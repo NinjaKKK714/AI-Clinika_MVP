@@ -1,0 +1,47 @@
+{
+  "expo": {
+    "name": "AI-Clinika",
+    "slug": "ai-clinika",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./ai.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.aiclinika.app",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./ai.png",
+        "backgroundColor": "#0863a7"
+      },
+                  "permissions": [
+              "CAMERA",
+              "READ_EXTERNAL_STORAGE",
+              "WRITE_EXTERNAL_STORAGE",
+              "CALL_PHONE",
+              "READ_CALENDAR",
+              "WRITE_CALENDAR"
+            ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+
+    "extra": {
+      "eas": {
+        "projectId": "5aee8bb1-6b7b-4908-ad91-13fe792f0d65"
+      }
+    },
+    "owner": "ninjasniper"
+  }
+}
