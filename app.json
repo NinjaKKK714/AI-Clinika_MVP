@@ -4,10 +4,10 @@
     "slug": "ai-clinika",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./ai.png",
+    "icon": "./Logo_New.jpg",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./Logo_New.jpg",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -15,28 +15,75 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Приложению необходим доступ к камере для съемки фото и видео",
+        "NSPhotoLibraryUsageDescription": "Приложению необходим доступ к галерее для выбора фото и видео",
+        "NSLocationWhenInUseUsageDescription": "Приложению необходим доступ к местоположению для отображения карты и построения маршрутов",
+        "NSMicrophoneUsageDescription": "Нужен доступ к микрофону",
+        "NSSpeechRecognitionUsageDescription": "Нужно для распознавания речи"
+      }
     },
     "android": {
       "package": "com.aiclinika.app",
       "versionCode": 1,
-      "adaptiveIcon": {
-        "foregroundImage": "./ai.png",
-        "backgroundColor": "#0863a7"
-      },
-                  "permissions": [
-              "CAMERA",
-              "READ_EXTERNAL_STORAGE",
-              "WRITE_EXTERNAL_STORAGE",
-              "CALL_PHONE",
-              "READ_CALENDAR",
-              "WRITE_CALENDAR"
-            ]
+      "icon": "./Logo_New.jpg",
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "CALL_PHONE",
+        "READ_CALENDAR",
+        "WRITE_CALENDAR",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "RECORD_AUDIO",
+        "RECOGNIZE_SPEECH",
+        "INTERNET"
+      ],
+      "manifest": {
+        "application": {
+          "android:appComponentFactory": "androidx.core.app.CoreComponentFactory",
+          "tools:replace": "android:appComponentFactory"
+        }
+      }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./Logo_New.jpg"
     },
-
+    "plugins": [
+      "expo-dev-client",
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Нужен доступ к микрофону для голосового ввода"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Приложению необходим доступ к местоположению для отображения карты и построения маршрутов"
+        }
+      ],
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "Приложению необходим доступ к календарю для записи к специалистам"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Приложению необходим доступ к галерее для выбора фото"
+        }
+      ],
+      [
+        "expo-document-picker",
+        {
+          "iCloudContainerEnvironment": "Production"
+        }
+      ]
+    ],
     "extra": {
       "eas": {
         "projectId": "5aee8bb1-6b7b-4908-ad91-13fe792f0d65"

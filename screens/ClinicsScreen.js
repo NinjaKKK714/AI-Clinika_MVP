@@ -8,15 +8,16 @@ import {
   Animated,
   Image,
   Dimensions,
-  TextInput
+  TextInput,
+  BackHandler
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import LocalIcons from '../components/LocalIcons';
 
 const { width } = Dimensions.get('window');
 
-export default function ClinicsScreen({ navigation }) {
-  const [selectedCategory, setSelectedCategory] = useState('dentist');
+export default function ClinicsScreen({ navigation, onBack }) {
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [favorites, setFavorites] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
@@ -38,7 +39,20 @@ export default function ClinicsScreen({ navigation }) {
         useNativeDriver: true,
       }),
     ]).start();
-  }, []);
+
+    // Обработчик системной кнопки "Назад" на Android
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (onBack) {
+        onBack();
+        return true; // Предотвращаем закрытие приложения
+      }
+      return false; // Позволяем системе обработать кнопку "Назад"
+    });
+
+    return () => {
+      backHandler.remove();
+    };
+  }, [onBack]);
 
   const categories = [
     { id: 'all', name: 'Все' },
@@ -58,7 +72,7 @@ export default function ClinicsScreen({ navigation }) {
       distance: '15 мин • 1.5 км',
       rating: 4.8,
       reviews: '1k+',
-      image: require('../ai.png'),
+      image: require('../Clinic_Photo/Clinic1.jpg'),
       category: 'cardiologist',
       description: 'Современная клиника с передовым оборудованием для диагностики и лечения сердечно-сосудистых заболеваний. Опытные кардиологи и стоматологи.',
       phone: '+7 (727) 123-45-67',
@@ -73,7 +87,7 @@ export default function ClinicsScreen({ navigation }) {
       distance: '20 мин • 2.1 км',
       rating: 4.6,
       reviews: '850+',
-      image: require('../ai.png'),
+      image: require('../Clinic_Photo/Clinic2.jpg'),
       category: 'dentist',
       description: 'Специализированный центр стоматологии и дерматологии. Используем современные технологии и материалы.',
       phone: '+7 (727) 234-56-78',
@@ -88,7 +102,7 @@ export default function ClinicsScreen({ navigation }) {
       distance: '25 мин • 3.2 км',
       rating: 4.9,
       reviews: '1.2k+',
-      image: require('../ai.png'),
+      image: require('../Clinic_Photo/Clinic3.jpg'),
       category: 'neurologist',
       description: 'Ведущая клиника в области неврологии и ортопедии. Инновационные методы лечения и реабилитации.',
       phone: '+7 (727) 345-67-89',
@@ -103,7 +117,7 @@ export default function ClinicsScreen({ navigation }) {
       distance: '18 мин • 2.8 км',
       rating: 4.7,
       reviews: '950+',
-      image: require('../ai.png'),
+      image: require('../Clinic_Photo/Clinic5.jpg'),
       category: 'dermatologist',
       description: 'Экспертный центр дерматологии с современной лабораторией и диагностическим оборудованием.',
       phone: '+7 (727) 456-78-90',
@@ -118,7 +132,7 @@ export default function ClinicsScreen({ navigation }) {
       distance: '22 мин • 2.5 км',
       rating: 4.5,
       reviews: '720+',
-      image: require('../ai.png'),
+      image: require('../Clinic_Photo/Clinic6.jpg'),
       category: 'orthopedist',
       description: 'Специализированная клиника ортопедии с отделением кардиологии. Современные методы лечения.',
       phone: '+7 (727) 567-89-01',
@@ -133,7 +147,7 @@ export default function ClinicsScreen({ navigation }) {
       distance: '12 мин • 1.8 км',
       rating: 4.9,
       reviews: '1.5k+',
-      image: require('../ai.png'),
+      image: require('../Clinic_Photo/Clinic7.jpg'),
       category: 'dentist',
       description: 'Премиальная стоматологическая клиника с хирургическим отделением. Используем лучшие материалы и технологии.',
       phone: '+7 (727) 678-90-12',
@@ -148,7 +162,7 @@ export default function ClinicsScreen({ navigation }) {
       distance: '30 мин • 4.1 км',
       rating: 4.8,
       reviews: '980+',
-      image: require('../ai.png'),
+      image: require('../Clinic_Photo/Clinic9.jpg'),
       category: 'cardiologist',
       description: 'Специализированный кардиологический центр с полным спектром диагностических услуг.',
       phone: '+7 (727) 789-01-23',
@@ -163,7 +177,7 @@ export default function ClinicsScreen({ navigation }) {
       distance: '16 мин • 2.3 км',
       rating: 4.6,
       reviews: '820+',
-      image: require('../ai.png'),
+      image: require('../Clinic_Photo/Clinic1.jpg'),
       category: 'dermatologist',
       description: 'Современная дерматологическая клиника с косметологическим отделением.',
       phone: '+7 (727) 890-12-34',
@@ -178,7 +192,7 @@ export default function ClinicsScreen({ navigation }) {
       distance: '28 мин • 3.8 км',
       rating: 4.7,
       reviews: '1.1k+',
-      image: require('../ai.png'),
+      image: require('../Clinic_Photo/Clinic2.jpg'),
       category: 'neurologist',
       description: 'Специализированный неврологический центр с отделением психиатрии.',
       phone: '+7 (727) 901-23-45',
@@ -193,7 +207,7 @@ export default function ClinicsScreen({ navigation }) {
       distance: '24 мин • 3.5 км',
       rating: 4.4,
       reviews: '650+',
-      image: require('../ai.png'),
+      image: require('../Clinic_Photo/Clinic3.jpg'),
       category: 'orthopedist',
       description: 'Специализированный ортопедический центр с травматологическим отделением.',
       phone: '+7 (727) 012-34-56',
@@ -212,7 +226,7 @@ export default function ClinicsScreen({ navigation }) {
       reviews: '450+',
       location: 'ул. Абая 150, Алматы',
       distance: '15 мин • 1.5 км',
-      image: require('../ai.png'),
+      image: require('../Doctor.jpg'),
       category: 'cardiologist',
       description: 'Ведущий кардиолог с 15-летним опытом работы. Специализируется на лечении сердечно-сосудистых заболеваний.',
       phone: '+7 (727) 123-45-67',
@@ -229,7 +243,7 @@ export default function ClinicsScreen({ navigation }) {
       reviews: '380+',
       location: 'пр. Достык 45, Алматы',
       distance: '20 мин • 2.1 км',
-      image: require('../ai.png'),
+      image: require('../Doctor.jpg'),
       category: 'dentist',
       description: 'Опытный стоматолог-терапевт. Специализируется на лечении кариеса и эстетической реставрации.',
       phone: '+7 (727) 234-56-78',
@@ -246,7 +260,7 @@ export default function ClinicsScreen({ navigation }) {
       reviews: '520+',
       location: 'ул. Толе би 78, Алматы',
       distance: '25 мин • 3.2 км',
-      image: require('../ai.png'),
+      image: require('../Doctor.jpg'),
       category: 'neurologist',
       description: 'Высококвалифицированный невролог с опытом работы в ведущих клиниках. Специалист по лечению мигрени.',
       phone: '+7 (727) 345-67-89',
@@ -263,7 +277,7 @@ export default function ClinicsScreen({ navigation }) {
       reviews: '320+',
       location: 'пр. Аль-Фараби 120, Алматы',
       distance: '18 мин • 2.8 км',
-      image: require('../ai.png'),
+      image: require('../Doctor.jpg'),
       category: 'dermatologist',
       description: 'Специалист по лечению кожных заболеваний и косметологии. Опыт работы в дерматологии.',
       phone: '+7 (727) 456-78-90',
@@ -280,7 +294,7 @@ export default function ClinicsScreen({ navigation }) {
       reviews: '410+',
       location: 'ул. Сатпаева 90, Алматы',
       distance: '22 мин • 2.5 км',
-      image: require('../ai.png'),
+      image: require('../Doctor.jpg'),
       category: 'orthopedist',
       description: 'Ортопед-травматолог с большим опытом в лечении заболеваний опорно-двигательного аппарата.',
       phone: '+7 (727) 567-89-01',
@@ -297,7 +311,7 @@ export default function ClinicsScreen({ navigation }) {
       reviews: '480+',
       location: 'ул. Фурманова 25, Алматы',
       distance: '12 мин • 1.8 км',
-      image: require('../ai.png'),
+      image: require('../Doctor.jpg'),
       category: 'dentist',
       description: 'Стоматолог-хирург с опытом проведения сложных операций. Специалист по имплантации.',
       phone: '+7 (727) 678-90-12',
@@ -314,7 +328,7 @@ export default function ClinicsScreen({ navigation }) {
       reviews: '360+',
       location: 'пр. Республики 85, Алматы',
       distance: '30 мин • 4.1 км',
-      image: require('../ai.png'),
+      image: require('../Doctor.jpg'),
       category: 'cardiologist',
       description: 'Кардиолог-аритмолог. Специализируется на лечении нарушений сердечного ритма.',
       phone: '+7 (727) 789-01-23',
@@ -331,7 +345,7 @@ export default function ClinicsScreen({ navigation }) {
       reviews: '290+',
       location: 'ул. Байтурсынова 45, Алматы',
       distance: '16 мин • 2.3 км',
-      image: require('../ai.png'),
+      image: require('../Doctor.jpg'),
       category: 'dermatologist',
       description: 'Дерматолог-косметолог. Специализируется на эстетической медицине и лечении акне.',
       phone: '+7 (727) 890-12-34',
@@ -348,7 +362,7 @@ export default function ClinicsScreen({ navigation }) {
       reviews: '340+',
       location: 'ул. Желтоксан 67, Алматы',
       distance: '28 мин • 3.8 км',
-      image: require('../ai.png'),
+      image: require('../Doctor.jpg'),
       category: 'neurologist',
       description: 'Невролог-эпилептолог. Специализируется на диагностике и лечении эпилепсии.',
       phone: '+7 (727) 901-23-45',
@@ -365,7 +379,7 @@ export default function ClinicsScreen({ navigation }) {
       reviews: '280+',
       location: 'пр. Абылай хана 112, Алматы',
       distance: '24 мин • 3.5 км',
-      image: require('../ai.png'),
+      image: require('../Doctor.jpg'),
       category: 'orthopedist',
       description: 'Ортопед-травматолог. Специализируется на лечении спортивных травм и артроскопии.',
       phone: '+7 (727) 012-34-56',
@@ -400,17 +414,36 @@ export default function ClinicsScreen({ navigation }) {
     }));
   };
 
-  const renderClinicCard = (clinic) => (
-    <TouchableOpacity 
-      key={clinic.id} 
-      style={styles.clinicCard}
-      onPress={() => navigation.navigate('ClinicDetail', { clinic })}
-    >
+  const renderClinicCard = (clinic) => {
+    if (!clinic) {
+      console.error('Clinic data is null or undefined');
+      return null;
+    }
+    
+    return (
+      <TouchableOpacity 
+        key={clinic.id} 
+        style={styles.clinicCard}
+        onPress={() => {
+          try {
+            if (navigation && navigation.navigate && clinic) {
+              navigation.navigate('ClinicDetail', { clinic });
+            } else {
+              console.error('Navigation or clinic data not available');
+            }
+          } catch (error) {
+            console.error('Error navigating to clinic detail:', error);
+          }
+        }}
+      >
       <View style={styles.clinicImageContainer}>
         <Image
-          source={clinic.image}
+          source={clinic.image || require('../ai.png')}
           style={styles.clinicImage}
           resizeMode="cover"
+          onError={(error) => {
+            console.log('Image load error:', error);
+          }}
         />
         
         {/* Рейтинг */}
@@ -456,19 +489,39 @@ export default function ClinicsScreen({ navigation }) {
         </View>
       </View>
     </TouchableOpacity>
-  );
+    );
+  };
 
-  const renderSpecialistCard = (specialist) => (
-    <TouchableOpacity 
-      key={specialist.id} 
-      style={styles.clinicCard}
-      onPress={() => navigation.navigate('SpecialistDetail', { specialist })}
-    >
+  const renderSpecialistCard = (specialist) => {
+    if (!specialist) {
+      console.error('Specialist data is null or undefined');
+      return null;
+    }
+    
+    return (
+      <TouchableOpacity 
+        key={specialist.id} 
+        style={styles.clinicCard}
+        onPress={() => {
+          try {
+            if (navigation && navigation.navigate && specialist) {
+              navigation.navigate('SpecialistDetail', { specialist });
+            } else {
+              console.error('Navigation or specialist data not available');
+            }
+          } catch (error) {
+            console.error('Error navigating to specialist detail:', error);
+          }
+        }}
+      >
       <View style={styles.clinicImageContainer}>
         <Image
-          source={specialist.image}
+          source={specialist.image || require('../ai.png')}
           style={styles.clinicImage}
           resizeMode="cover"
+          onError={(error) => {
+            console.log('Image load error:', error);
+          }}
         />
         
         {/* Рейтинг */}
@@ -514,7 +567,8 @@ export default function ClinicsScreen({ navigation }) {
         </View>
       </View>
     </TouchableOpacity>
-  );
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -522,6 +576,10 @@ export default function ClinicsScreen({ navigation }) {
         {/* Заголовок */}
         <LinearGradient colors={['#0863a7', '#074393']} style={styles.header}>
           <View style={styles.headerContent}>
+            <TouchableOpacity onPress={onBack} style={styles.backButton}>
+              {LocalIcons.arrowBack({ size: 24, color: '#ffffff' })}
+            </TouchableOpacity>
+            
             <Text style={styles.headerTitle}>Медицинские услуги</Text>
             
             <TouchableOpacity 
@@ -599,7 +657,11 @@ export default function ClinicsScreen({ navigation }) {
         </View>
 
         {/* Список клиник или специалистов */}
-        <ScrollView style={styles.clinicsList} showsVerticalScrollIndicator={false}>
+        <ScrollView 
+          style={styles.clinicsList} 
+          contentContainerStyle={styles.clinicsListContent}
+          showsVerticalScrollIndicator={false}
+        >
           {activeTab === 'clinics' ? (
             filteredClinics.length > 0 ? (
               filteredClinics.map(renderClinicCard)
@@ -640,6 +702,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  backButton: {
+    marginRight: 15,
+    padding: 5,
   },
 
   headerTitle: {
@@ -737,6 +803,9 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 20,
+  },
+  clinicsListContent: {
+    paddingBottom: 120, // Отступ для нижней панели навигации
   },
   clinicCard: {
     backgroundColor: '#ffffff',

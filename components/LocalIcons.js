@@ -67,6 +67,9 @@ export const LocalIcons = {
   'chevron-forward': ({ size = 24, color = '#000000' }) => (
     <Ionicons name="chevron-forward-outline" size={size} color={color} />
   ),
+  'chevron': ({ size = 24, color = '#000000' }) => (
+    <Ionicons name="chevron-down-outline" size={size} color={color} />
+  ),
 
   // Приложения
   apps: ({ size = 24, color = '#000000' }) => (
@@ -96,6 +99,11 @@ export const LocalIcons = {
   // Звук
   'volume-high': ({ size = 24, color = '#000000' }) => (
     <Ionicons name="volume-high-outline" size={size} color={color} />
+  ),
+
+  // Видео
+  play: ({ size = 24, color = '#000000' }) => (
+    <Ionicons name="play-circle-outline" size={size} color={color} />
   ),
 
   // Луна
@@ -298,6 +306,46 @@ export const LocalIcons = {
 
   language: ({ size = 24, color = '#000000' }) => (
     <Ionicons name="language-outline" size={size} color={color} />
+  ),
+
+  // Календарь
+  calendar: ({ size = 24, color = '#000000' }) => (
+    <Ionicons name="calendar-outline" size={size} color={color} />
+  ),
+
+  // Видео
+  video: ({ size = 24, color = '#000000' }) => (
+    <Ionicons name="videocam-outline" size={size} color={color} />
+  ),
+
+  // Bluetooth
+  bluetooth: ({ size = 24, color = '#000000' }) => (
+    <Ionicons name="bluetooth-outline" size={size} color={color} />
+  ),
+
+  // WiFi
+  wifi: ({ size = 24, color = '#000000' }) => (
+    <Ionicons name="wifi-outline" size={size} color={color} />
+  ),
+
+  // Поделиться
+  share: ({ size = 24, color = '#000000' }) => (
+    <Ionicons name="share-outline" size={size} color={color} />
+  ),
+
+  // AI иконка
+  ai: ({ size = 24, color = '#000000' }) => (
+    <Ionicons name="hardware-chip-outline" size={size} color={color} />
+  ),
+
+  // Робот
+  robot: ({ size = 24, color = '#000000' }) => (
+    <Ionicons name="construct-outline" size={size} color={color} />
+  ),
+
+  // Часы
+  clock: ({ size = 24, color = '#000000' }) => (
+    <Ionicons name="time-outline" size={size} color={color} />
   ),
 };
 

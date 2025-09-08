@@ -5,13 +5,15 @@ import {
   StyleSheet, 
   ScrollView, 
   TouchableOpacity, 
-  Animated
+  Animated,
+  BackHandler
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import LocalIcons from '../components/LocalIcons';
 
-export default function RequestDetailScreen({ route, navigation }) {
+export default function RequestDetailScreen({ route, navigation, onBack }) {
   const { request } = route.params;
+  console.log('RequestDetailScreen received request:', request);
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
@@ -29,7 +31,20 @@ export default function RequestDetailScreen({ route, navigation }) {
         useNativeDriver: true,
       }),
     ]).start();
-  }, []);
+
+    // Обработчик системной кнопки "Назад" на Android
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (onBack) {
+        onBack();
+        return true; // Предотвращаем закрытие приложения
+      }
+      return false; // Позволяем системе обработать кнопку "Назад"
+    });
+
+    return () => {
+      backHandler.remove();
+    };
+  }, [onBack]);
 
   const renderSymptomItem = (symptom, index) => (
     <View key={index} style={styles.symptomItem}>
@@ -61,7 +76,11 @@ export default function RequestDetailScreen({ route, navigation }) {
           </View>
         </LinearGradient>
 
-        <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <ScrollView 
+          style={styles.scrollContent} 
+          contentContainerStyle={styles.scrollContentContainer}
+          showsVerticalScrollIndicator={false}
+        >
           {/* Основная информация */}
           <View style={styles.mainInfo}>
             <View style={styles.dateTimeContainer}>
@@ -204,6 +223,9 @@ const styles = StyleSheet.create({
   scrollContent: {
     flex: 1,
   },
+  scrollContentContainer: {
+    paddingBottom: 120, // Отступ для нижней панели навигации
+  },
   mainInfo: {
     padding: 20,
     backgroundColor: '#ffffff',
@@ -327,5 +349,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
+
 
 

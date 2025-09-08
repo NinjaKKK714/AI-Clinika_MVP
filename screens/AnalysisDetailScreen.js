@@ -9,14 +9,15 @@ import {
   Image,
   Dimensions,
   Alert,
-  Linking
+  Linking,
+  BackHandler
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import LocalIcons from '../components/LocalIcons';
 
 const { width, height } = Dimensions.get('window');
 
-export default function AnalysisDetailScreen({ route, navigation }) {
+export default function AnalysisDetailScreen({ route, navigation, onBack }) {
   const { analysis } = route.params;
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -35,7 +36,20 @@ export default function AnalysisDetailScreen({ route, navigation }) {
         useNativeDriver: true,
       }),
     ]).start();
-  }, []);
+
+    // Обработчик системной кнопки "Назад" на Android
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (onBack) {
+        onBack();
+        return true; // Предотвращаем закрытие приложения
+      }
+      return false; // Позволяем системе обработать кнопку "Назад"
+    });
+
+    return () => {
+      backHandler.remove();
+    };
+  }, [onBack]);
 
   const handleViewFile = () => {
     if (analysis.file.type === 'pdf') {
@@ -120,7 +134,11 @@ export default function AnalysisDetailScreen({ route, navigation }) {
           </View>
         </LinearGradient>
 
-        <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <ScrollView 
+          style={styles.scrollContent} 
+          contentContainerStyle={styles.scrollContentContainer}
+          showsVerticalScrollIndicator={false}
+        >
           {/* Основная информация */}
           <View style={styles.mainInfo}>
             <View style={styles.dateTimeContainer}>
@@ -235,6 +253,9 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flex: 1,
+  },
+  scrollContentContainer: {
+    paddingBottom: 120, // Отступ снизу для корректного скроллинга
   },
   mainInfo: {
     padding: 20,
@@ -363,5 +384,6 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
 });
+
 
 

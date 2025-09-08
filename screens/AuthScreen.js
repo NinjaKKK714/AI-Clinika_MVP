@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TextInput, 
-  TouchableOpacity, 
-  Animated, 
-  ScrollView, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Animated,
+  ScrollView,
   Alert,
+  BackHandler,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -16,6 +17,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import LocalIcons from '../components/LocalIcons';
+import StorageService from '../services/storageService';
 
 export default function AuthScreen({ onAuthSuccess }) {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -30,6 +32,9 @@ export default function AuthScreen({ onAuthSuccess }) {
   const [isLoading, setIsLoading] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [showPersonalDataModal, setShowPersonalDataModal] = useState(false);
+  const [birthDateError, setBirthDateError] = useState(false);
+  const [addressError, setAddressError] = useState(false);
+  const [iinError, setIinError] = useState(false);
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
@@ -55,21 +60,62 @@ export default function AuthScreen({ onAuthSuccess }) {
     ]).start();
   }, []);
 
+  // Обработка системной кнопки "Назад"
+  useEffect(() => {
+    const backAction = () => {
+      // На экране авторизации показываем диалог выхода
+      Alert.alert(
+        'Выход из приложения',
+        'Вы уверены, что хотите выйти?',
+        [
+          {
+            text: 'Отмена',
+            onPress: () => null,
+            style: 'cancel',
+          },
+          {
+            text: 'Выйти',
+            onPress: () => BackHandler.exitApp(),
+          },
+        ]
+      );
+      return true; // Предотвращаем стандартное поведение
+    };
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+
+    return () => backHandler.remove();
+  }, []);
+
   const formatPhoneNumber = (text) => {
     // Удаляем все нецифровые символы
     const cleaned = text.replace(/\D/g, '');
     
+    // Если номер начинается с 8, заменяем на 7
+    let phoneDigits = cleaned;
+    if (phoneDigits.startsWith('8')) {
+      phoneDigits = '7' + phoneDigits.slice(1);
+    }
+    
+    // Если номер не начинается с 7, добавляем 7
+    if (!phoneDigits.startsWith('7') && phoneDigits.length > 0) {
+      phoneDigits = '7' + phoneDigits;
+    }
+    
+    // Ограничиваем до 11 цифр (7 + 10 цифр)
+    phoneDigits = phoneDigits.slice(0, 11);
+    
     // Форматируем номер телефона
-    if (cleaned.length <= 1) {
-      return `+7 (${cleaned}`;
-    } else if (cleaned.length <= 4) {
-      return `+7 (${cleaned.slice(1, 4)}`;
-    } else if (cleaned.length <= 7) {
-      return `+7 (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}`;
-    } else if (cleaned.length <= 9) {
-      return `+7 (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7, 9)}`;
+    if (phoneDigits.length <= 1) {
+      return phoneDigits.length > 0 ? `+7 (${phoneDigits.slice(1)}` : '+7 (';
+    } else if (phoneDigits.length <= 4) {
+      return `+7 (${phoneDigits.slice(1, 4)}`;
+    } else if (phoneDigits.length <= 7) {
+      return `+7 (${phoneDigits.slice(1, 4)}) ${phoneDigits.slice(4, 7)}`;
+    } else if (phoneDigits.length <= 9) {
+      return `+7 (${phoneDigits.slice(1, 4)}) ${phoneDigits.slice(4, 7)}-${phoneDigits.slice(7, 9)}`;
     } else {
-      return `+7 (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7, 9)}-${cleaned.slice(9, 11)}`;
+      return `+7 (${phoneDigits.slice(1, 4)}) ${phoneDigits.slice(4, 7)}-${phoneDigits.slice(7, 9)}-${phoneDigits.slice(9, 11)}`;
     }
   };
 
@@ -84,28 +130,108 @@ export default function AuthScreen({ onAuthSuccess }) {
     }
   };
 
+  const formatBirthDate = (text) => {
+    // Удаляем все нецифровые символы
+    const cleaned = text.replace(/\D/g, '');
+    
+    // Ограничиваем до 8 цифр
+    const limited = cleaned.slice(0, 8);
+    
+    // Форматируем с точками
+    if (limited.length <= 2) {
+      return limited;
+    } else if (limited.length <= 4) {
+      return `${limited.slice(0, 2)}.${limited.slice(2)}`;
+    } else {
+      return `${limited.slice(0, 2)}.${limited.slice(2, 4)}.${limited.slice(4)}`;
+    }
+  };
+
+  const handleBirthDateChange = (text) => {
+    const formatted = formatBirthDate(text);
+    setBirthDate(formatted);
+    
+    // Проверяем валидность и устанавливаем ошибку
+    if (formatted.length === 10) {
+      const isValid = validateBirthDate(formatted);
+      setBirthDateError(!isValid);
+    } else {
+      setBirthDateError(false);
+    }
+  };
+
   const validatePhoneNumber = () => {
     const cleaned = phoneNumber.replace(/\D/g, '');
     return cleaned.length === 11 && cleaned.startsWith('7');
   };
 
   const validateIIN = () => {
-    return iin.length === 12 && /^\d+$/.test(iin);
+    return iin.length === 12 && /^\d{12}$/.test(iin);
   };
 
   const validateFullName = () => {
     return fullName.trim().length >= 3;
   };
 
-  const validateBirthDate = () => {
-    return birthDate.length === 10; // DD.MM.YYYY
+  const validateBirthDate = (dateToValidate = birthDate) => {
+    if (dateToValidate.length !== 10) return false; // DD.MM.YYYY
+    
+    // Проверяем формат DD.MM.YYYY
+    const dateRegex = /^(\d{2})\.(\d{2})\.(\d{4})$/;
+    const match = dateToValidate.match(dateRegex);
+    
+    if (!match) return false;
+    
+    const day = parseInt(match[1], 10);
+    const month = parseInt(match[2], 10);
+    const year = parseInt(match[3], 10);
+    
+    // Проверяем корректность даты
+    if (day < 1 || day > 31) return false;
+    if (month < 1 || month > 12) return false;
+    if (year < 1900 || year > new Date().getFullYear()) return false;
+    
+    // Проверяем, что дата не в будущем
+    const inputDate = new Date(year, month - 1, day);
+    const today = new Date();
+    if (inputDate > today) return false;
+    
+    return true;
   };
 
   const validateAddress = () => {
-    return address.trim().length >= 10;
+    return address.trim().length >= 3; // Минимум 3 символа для адреса
   };
 
-  const handleSubmit = () => {
+  const handleAddressChange = (text) => {
+    setAddress(text);
+    
+    // Проверяем валидность и устанавливаем ошибку
+    if (text.trim().length > 0) {
+      const isValid = validateAddress();
+      setAddressError(!isValid);
+    } else {
+      setAddressError(false);
+    }
+  };
+
+  const handleIinChange = (text) => {
+    // Оставляем только цифры
+    const cleaned = text.replace(/\D/g, '');
+    // Ограничиваем до 12 цифр
+    const limited = cleaned.slice(0, 12);
+    setIin(limited);
+    
+    // Проверяем валидность и устанавливаем ошибку
+    if (limited.length > 0) {
+      const isValid = limited.length === 12;
+      setIinError(!isValid);
+    } else {
+      setIinError(false);
+    }
+  };
+
+  const handleSubmit = async () => {
     if (!validatePhoneNumber()) {
       Alert.alert('Ошибка', 'Введите корректный номер телефона');
       return;
@@ -144,21 +270,53 @@ export default function AuthScreen({ onAuthSuccess }) {
     }
 
     setIsLoading(true);
-    
-    // Симуляция процесса авторизации/регистрации
-    setTimeout(() => {
+
+    try {
+      if (isRegistration) {
+        // Сохраняем данные пользователя при регистрации
+        const userData = {
+          phoneNumber: phoneNumber.replace(/\s/g, ''), // Очищаем от пробелов для хранения
+          fullName: fullName.trim(),
+          gender,
+          iin: iin.trim(),
+          birthDate: birthDate.trim(),
+          address: address.trim(),
+          email: '', // Поле для email, можно заполнить позже
+          registrationDate: new Date().toLocaleDateString('ru-RU')
+        };
+
+        const saveSuccess = await StorageService.saveUserData(userData);
+        if (!saveSuccess) {
+          throw new Error('Не удалось сохранить данные пользователя');
+        }
+      } else {
+        // При входе проверяем, есть ли сохраненные данные
+        const isAuth = await StorageService.isAuthenticated();
+        if (!isAuth) {
+          Alert.alert('Ошибка', 'Пользователь не найден. Пожалуйста, зарегистрируйтесь.');
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // Симуляция процесса авторизации/регистрации
+      setTimeout(() => {
+        setIsLoading(false);
+        Alert.alert(
+          'Успешно',
+          isRegistration ? 'Регистрация завершена!' : 'Вход выполнен!',
+          [
+            {
+              text: 'OK',
+              onPress: () => onAuthSuccess(),
+            },
+          ]
+        );
+      }, 2000);
+    } catch (error) {
       setIsLoading(false);
-      Alert.alert(
-        'Успешно',
-        isRegistration ? 'Регистрация завершена!' : 'Вход выполнен!',
-        [
-          {
-            text: 'OK',
-            onPress: () => onAuthSuccess(),
-          },
-        ]
-      );
-    }, 2000);
+      Alert.alert('Ошибка', error.message || 'Произошла ошибка при авторизации');
+    }
   };
 
   const canSubmit = () => {
@@ -312,50 +470,66 @@ export default function AuthScreen({ onAuthSuccess }) {
 
                   {/* ИИН */}
                   <View style={styles.inputContainer}>
-                    <View style={styles.inputWrapper}>
-                      {LocalIcons.document({ size: 20, color: "#0863a7" })}
+                    <View style={[styles.inputWrapper, iinError && styles.inputWrapperError]}>
+                      {LocalIcons.document({ size: 20, color: iinError ? "#ff4444" : "#0863a7" })}
                       <TextInput
                         style={styles.input}
                         placeholder="ИИН (12 цифр)"
                         placeholderTextColor="#9ad0e7"
                         value={iin}
-                        onChangeText={setIin}
+                        onChangeText={handleIinChange}
                         keyboardType="numeric"
                         maxLength={12}
                       />
                     </View>
+                    {iinError && (
+                      <Text style={styles.errorText}>
+                        ИИН должен содержать ровно 12 цифр
+                      </Text>
+                    )}
                   </View>
 
                   {/* Дата рождения */}
                   <View style={styles.inputContainer}>
-                    <View style={styles.inputWrapper}>
-                      {LocalIcons.time({ size: 20, color: "#0863a7" })}
+                    <View style={[styles.inputWrapper, birthDateError && styles.inputWrapperError]}>
+                      {LocalIcons.time({ size: 20, color: birthDateError ? "#ff4444" : "#0863a7" })}
                       <TextInput
                         style={styles.input}
                         placeholder="Дата рождения (ДД.ММ.ГГГГ)"
                         placeholderTextColor="#9ad0e7"
                         value={birthDate}
-                        onChangeText={setBirthDate}
+                        onChangeText={handleBirthDateChange}
                         maxLength={10}
+                        keyboardType="numeric"
                       />
                     </View>
+                    {birthDateError && (
+                      <Text style={styles.errorText}>
+                        Введите корректную дату рождения (ДД.ММ.ГГГГ)
+                      </Text>
+                    )}
                   </View>
 
                   {/* Адрес */}
                   <View style={styles.inputContainer}>
-                    <View style={styles.inputWrapper}>
-                      {LocalIcons.location({ size: 20, color: "#0863a7" })}
+                    <View style={[styles.inputWrapper, addressError && styles.inputWrapperError]}>
+                      {LocalIcons.location({ size: 20, color: addressError ? "#ff4444" : "#0863a7" })}
                       <TextInput
                         style={styles.addressInput}
                         placeholder="Адрес места жительства"
                         placeholderTextColor="#9ad0e7"
                         value={address}
-                        onChangeText={setAddress}
+                        onChangeText={handleAddressChange}
                         maxLength={200}
                         multiline={true}
                         numberOfLines={2}
                       />
                     </View>
+                    {addressError && (
+                      <Text style={styles.errorText}>
+                        Адрес должен содержать минимум 3 символа
+                      </Text>
+                    )}
                   </View>
                 </>
               )}
@@ -653,6 +827,17 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#ffffff',
+  },
+  inputWrapperError: {
+    borderColor: '#ff4444',
+    borderWidth: 2,
+  },
+  errorText: {
+    fontSize: 12,
+    color: '#ff4444',
+    marginTop: 5,
+    marginLeft: 5,
+    fontFamily: 'Open Sauce',
   },
   infoContainer: {
     alignItems: 'center',

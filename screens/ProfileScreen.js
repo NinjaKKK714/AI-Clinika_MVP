@@ -1,30 +1,33 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  ScrollView, 
-  TouchableOpacity, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
   Animated,
   Image,
   Alert,
+  BackHandler,
   TextInput,
-  Modal
+  Modal,
+  Platform
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import LocalIcons from '../components/LocalIcons';
+import StorageService from '../services/storageService';
 
-export default function ProfileScreen({ onBack }) {
+export default function ProfileScreen({ onBack, onLogout }) {
   const [userData, setUserData] = useState({
-    fullName: 'Иванов Иван Иванович',
-    phone: '+7 (777) 123-45-67',
-    gender: 'Мужской',
-    iin: '123456789012',
-    birthDate: '15.03.1990',
-    address: 'г. Алматы, ул. Абая, д. 150, кв. 25',
-    email: 'ivanov@example.com',
-    registrationDate: '01.01.2024'
+    fullName: '',
+    phone: '',
+    gender: '',
+    iin: '',
+    birthDate: '',
+    address: '',
+    email: '',
+    registrationDate: ''
   });
 
   const [editingField, setEditingField] = useState(null);
@@ -32,11 +35,16 @@ export default function ProfileScreen({ onBack }) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [editError, setEditError] = useState(false);
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
 
   useEffect(() => {
+    loadUserData();
+    loadProfilePhoto();
+
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -51,37 +59,306 @@ export default function ProfileScreen({ onBack }) {
     ]).start();
   }, []);
 
+  // Обработка системной кнопки "Назад"
+  useEffect(() => {
+    const backAction = () => {
+      // Возвращаемся на главный экран
+      onBack();
+      return true; // Предотвращаем стандартное поведение
+    };
 
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+
+    return () => backHandler.remove();
+  }, [onBack]);
+
+  const loadUserData = async () => {
+    try {
+      const storedData = await StorageService.getUserData();
+      if (storedData) {
+        // Преобразуем данные для отображения
+        const displayData = {
+          fullName: storedData.fullName || '',
+          phone: formatPhoneForDisplay(storedData.phoneNumber || ''),
+          gender: storedData.gender === 'male' ? 'Мужской' : storedData.gender === 'female' ? 'Женский' : '',
+          iin: storedData.iin || '',
+          birthDate: storedData.birthDate || '',
+          address: storedData.address || '',
+          email: storedData.email || '',
+          registrationDate: storedData.registrationDate || ''
+        };
+        setUserData(displayData);
+      }
+    } catch (error) {
+      console.error('Error loading user data:', error);
+      Alert.alert('Ошибка', 'Не удалось загрузить данные пользователя');
+    }
+  };
+
+  const loadProfilePhoto = async () => {
+    try {
+      const photoUri = await StorageService.getProfilePhoto();
+      if (photoUri) {
+        setProfilePhoto(photoUri);
+      }
+    } catch (error) {
+      console.error('Error loading profile photo:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const formatPhoneForDisplay = (phoneNumber) => {
+    if (!phoneNumber) return '';
+    const cleaned = phoneNumber.replace(/\D/g, '');
+    if (cleaned.length === 11 && cleaned.startsWith('7')) {
+      return `+7 (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7, 9)}-${cleaned.slice(9, 11)}`;
+    }
+    return phoneNumber;
+  };
+
+
+
+  const getFieldKey = (title) => {
+    if (!title) return '';
+    const fieldMap = {
+      'ФИО': 'fullName',
+      'Телефон': 'phone',
+      'Пол': 'gender',
+      'ИИН': 'iin',
+      'Дата рождения': 'birthDate',
+      'Адрес': 'address',
+      'Email': 'email'
+    };
+    return fieldMap[title] || title.toLowerCase().replace(/\s+/g, '');
+  };
+
+  const getFieldTitle = (fieldKey) => {
+    if (!fieldKey) return '';
+    const titleMap = {
+      'fullName': 'ФИО',
+      'phone': 'Телефон',
+      'gender': 'Пол',
+      'iin': 'ИИН',
+      'birthDate': 'Дата рождения',
+      'address': 'Адрес',
+      'email': 'Email'
+    };
+    return titleMap[fieldKey] || fieldKey;
+  };
+
+  const formatBirthDate = (text) => {
+    // Удаляем все нецифровые символы
+    const cleaned = text.replace(/\D/g, '');
+    
+    // Ограничиваем до 8 цифр
+    const limited = cleaned.slice(0, 8);
+    
+    // Форматируем с точками
+    if (limited.length <= 2) {
+      return limited;
+    } else if (limited.length <= 4) {
+      return `${limited.slice(0, 2)}.${limited.slice(2)}`;
+    } else {
+      return `${limited.slice(0, 2)}.${limited.slice(2, 4)}.${limited.slice(4)}`;
+    }
+  };
+
+  const validateBirthDate = (dateString) => {
+    if (dateString.length !== 10) return false; // DD.MM.YYYY
+    
+    // Проверяем формат DD.MM.YYYY
+    const dateRegex = /^(\d{2})\.(\d{2})\.(\d{4})$/;
+    const match = dateString.match(dateRegex);
+    
+    if (!match) return false;
+    
+    const day = parseInt(match[1], 10);
+    const month = parseInt(match[2], 10);
+    const year = parseInt(match[3], 10);
+    
+    // Проверяем корректность даты
+    if (day < 1 || day > 31) return false;
+    if (month < 1 || month > 12) return false;
+    if (year < 1900 || year > new Date().getFullYear()) return false;
+    
+    // Проверяем, что дата не в будущем
+    const inputDate = new Date(year, month - 1, day);
+    const today = new Date();
+    if (inputDate > today) return false;
+    
+    return true;
+  };
+
+  const validateIIN = (iinString) => {
+    return iinString.length === 12 && /^\d{12}$/.test(iinString);
+  };
+
+  const formatPhoneNumber = (text) => {
+    // Удаляем все нецифровые символы
+    const cleaned = text.replace(/\D/g, '');
+    
+    // Если номер начинается с 8, заменяем на 7
+    let phoneDigits = cleaned;
+    if (phoneDigits.startsWith('8')) {
+      phoneDigits = '7' + phoneDigits.slice(1);
+    }
+    
+    // Если номер не начинается с 7, добавляем 7
+    if (!phoneDigits.startsWith('7') && phoneDigits.length > 0) {
+      phoneDigits = '7' + phoneDigits;
+    }
+    
+    // Ограничиваем до 11 цифр (7 + 10 цифр)
+    phoneDigits = phoneDigits.slice(0, 11);
+    
+    // Форматируем номер телефона
+    if (phoneDigits.length <= 1) {
+      return phoneDigits.length > 0 ? `+7 (${phoneDigits.slice(1)}` : '+7 (';
+    } else if (phoneDigits.length <= 4) {
+      return `+7 (${phoneDigits.slice(1, 4)}`;
+    } else if (phoneDigits.length <= 7) {
+      return `+7 (${phoneDigits.slice(1, 4)}) ${phoneDigits.slice(4, 7)}`;
+    } else if (phoneDigits.length <= 9) {
+      return `+7 (${phoneDigits.slice(1, 4)}) ${phoneDigits.slice(4, 7)}-${phoneDigits.slice(7, 9)}`;
+    } else {
+      return `+7 (${phoneDigits.slice(1, 4)}) ${phoneDigits.slice(4, 7)}-${phoneDigits.slice(7, 9)}-${phoneDigits.slice(9, 11)}`;
+    }
+  };
 
   const handleEditField = (field, currentValue) => {
     setEditingField(field);
     setEditValue(currentValue);
+    setEditError(false);
     setShowEditModal(true);
   };
 
-  const handleSaveEdit = () => {
-    if (editValue.trim()) {
-      setUserData(prev => ({
-        ...prev,
+  const handleSaveEdit = async () => {
+    try {
+      if (!editingField) {
+        Alert.alert('Ошибка', 'Не выбрано поле для редактирования');
+        return;
+      }
+
+      // Валидация для даты рождения
+      if (editingField === 'birthDate') {
+        if (editValue.length === 10) {
+          const isValid = validateBirthDate(editValue);
+          if (!isValid) {
+            setEditError(true);
+            return;
+          }
+        } else {
+          setEditError(true);
+          return;
+        }
+      }
+
+      // Валидация для ИИН
+      if (editingField === 'iin') {
+        const isValid = validateIIN(editValue);
+        if (!isValid) {
+          setEditError(true);
+          return;
+        }
+      }
+
+      // Обновляем локальное состояние
+      const updatedUserData = {
+        ...userData,
         [editingField]: editValue.trim()
-      }));
+      };
+      setUserData(updatedUserData);
+
+      // Сохраняем в локальное хранилище
+      const storageData = convertToStorageFormat(updatedUserData);
+      const saveSuccess = await StorageService.updateUserData(storageData);
+
+      if (!saveSuccess) {
+        Alert.alert('Ошибка', 'Не удалось сохранить изменения');
+        return;
+      }
+
       setShowEditModal(false);
       setEditingField(null);
       setEditValue('');
+    } catch (error) {
+      console.error('Error saving user data:', error);
+      Alert.alert('Ошибка', 'Не удалось сохранить изменения');
     }
+  };
+
+  const convertToStorageFormat = (displayData) => {
+    return {
+      fullName: displayData.fullName || '',
+      phoneNumber: displayData.phone ? displayData.phone.replace(/\D/g, '') : '', // Очищаем от форматирования
+      gender: displayData.gender === 'Мужской' ? 'male' : displayData.gender === 'Женский' ? 'female' : '',
+      iin: displayData.iin || '',
+      birthDate: displayData.birthDate || '',
+      address: displayData.address || '',
+      email: displayData.email || '',
+      registrationDate: displayData.registrationDate || ''
+    };
   };
 
   const handleCancelEdit = () => {
     setShowEditModal(false);
     setEditingField(null);
     setEditValue('');
+    setEditError(false);
   };
 
-  const requestPermissions = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Ошибка', 'Необходимо разрешение на доступ к галерее');
-      return false;
+  const handleEditValueChange = (text) => {
+    if (editingField === 'birthDate') {
+      const formatted = formatBirthDate(text);
+      setEditValue(formatted);
+      
+      // Проверяем валидность и устанавливаем ошибку
+      if (formatted.length === 10) {
+        const isValid = validateBirthDate(formatted);
+        setEditError(!isValid);
+      } else {
+        setEditError(false);
+      }
+    } else if (editingField === 'iin') {
+      // Оставляем только цифры
+      const cleaned = text.replace(/\D/g, '');
+      // Ограничиваем до 12 цифр
+      const limited = cleaned.slice(0, 12);
+      setEditValue(limited);
+      
+      // Проверяем валидность и устанавливаем ошибку
+      if (limited.length > 0) {
+        const isValid = validateIIN(limited);
+        setEditError(!isValid);
+      } else {
+        setEditError(false);
+      }
+    } else if (editingField === 'phone') {
+      const formatted = formatPhoneNumber(text);
+      setEditValue(formatted);
+      setEditError(false);
+    } else {
+      setEditValue(text);
+      setEditError(false);
+    }
+  };
+
+  const requestPermissions = async (type = 'media') => {
+    if (Platform.OS !== 'web') {
+      if (type === 'camera') {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert('Ошибка', 'Необходим доступ к камере для съемки фото');
+          return false;
+        }
+      } else {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert('Ошибка', 'Необходимо разрешение на доступ к галерее');
+          return false;
+        }
+      }
     }
     return true;
   };
@@ -91,19 +368,22 @@ export default function ProfileScreen({ onBack }) {
   };
 
   const takePhoto = async () => {
-    const hasPermission = await requestPermissions();
-    if (!hasPermission) return;
-
     try {
+      const hasPermission = await requestPermissions('camera');
+      if (!hasPermission) return;
+
+      console.log('Запуск камеры...');
       const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaType.Images,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
       });
 
       if (!result.canceled && result.assets[0]) {
-        setProfilePhoto(result.assets[0].uri);
+        const photoUri = result.assets[0].uri;
+        setProfilePhoto(photoUri);
+        await StorageService.saveProfilePhoto(photoUri);
         setShowPhotoModal(false);
       }
     } catch (error) {
@@ -112,19 +392,22 @@ export default function ProfileScreen({ onBack }) {
   };
 
   const pickImage = async () => {
-    const hasPermission = await requestPermissions();
-    if (!hasPermission) return;
-
     try {
+      const hasPermission = await requestPermissions('media');
+      if (!hasPermission) return;
+
+      console.log('Открытие галереи для фото...');
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaType.Images,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
       });
 
       if (!result.canceled && result.assets[0]) {
-        setProfilePhoto(result.assets[0].uri);
+        const photoUri = result.assets[0].uri;
+        setProfilePhoto(photoUri);
+        await StorageService.saveProfilePhoto(photoUri);
         setShowPhotoModal(false);
       }
     } catch (error) {
@@ -132,9 +415,15 @@ export default function ProfileScreen({ onBack }) {
     }
   };
 
-  const removePhoto = () => {
-    setProfilePhoto(null);
-    setShowPhotoModal(false);
+  const removePhoto = async () => {
+    try {
+      setProfilePhoto(null);
+      await StorageService.deleteProfilePhoto();
+      setShowPhotoModal(false);
+    } catch (error) {
+      console.error('Error removing profile photo:', error);
+      Alert.alert('Ошибка', 'Не удалось удалить фото');
+    }
   };
 
   const handleLogout = () => {
@@ -149,9 +438,28 @@ export default function ProfileScreen({ onBack }) {
         {
           text: 'Выйти',
           style: 'destructive',
-          onPress: () => {
-            // Здесь будет логика выхода
-            console.log('Выход из аккаунта');
+          onPress: async () => {
+            try {
+              const logoutSuccess = await StorageService.logout();
+              if (logoutSuccess) {
+                // Возвращаемся к экрану авторизации
+                if (onBack) {
+                  // Сначала возвращаемся к предыдущему экрану
+                  onBack();
+                  // Через небольшую задержку вызываем onLogout, если он передан
+                  setTimeout(() => {
+                    if (onLogout) {
+                      onLogout();
+                    }
+                  }, 100);
+                }
+              } else {
+                Alert.alert('Ошибка', 'Не удалось выйти из аккаунта');
+              }
+            } catch (error) {
+              console.error('Error during logout:', error);
+              Alert.alert('Ошибка', 'Произошла ошибка при выходе из аккаунта');
+            }
           },
         },
       ]
@@ -172,9 +480,9 @@ export default function ProfileScreen({ onBack }) {
         <Text style={styles.infoValue}>{value}</Text>
       </View>
       {isEditable && (
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.editButton}
-          onPress={() => handleEditField(title.toLowerCase().replace(/\s+/g, ''), value)}
+          onPress={() => handleEditField(getFieldKey(title), value)}
         >
           {LocalIcons.edit ? LocalIcons.edit({ size: 20, color: "#0863a7" }) : 
             <Text style={{ color: "#0863a7", fontSize: 16 }}>✏️</Text>
@@ -218,7 +526,11 @@ export default function ProfileScreen({ onBack }) {
           </View>
         </LinearGradient>
 
-        <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <ScrollView 
+          style={styles.scrollContent} 
+          contentContainerStyle={styles.scrollContentContainer}
+          showsVerticalScrollIndicator={false}
+        >
           {/* Основная информация */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Основная информация</Text>
@@ -347,27 +659,48 @@ export default function ProfileScreen({ onBack }) {
 
       {/* Модальное окно редактирования */}
       <Modal
-        visible={showEditModal}
+        visible={showEditModal && editingField !== null}
         transparent={true}
         animationType="none"
         onRequestClose={handleCancelEdit}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Редактировать {editingField}</Text>
+            <Text style={styles.modalTitle}>Редактировать {getFieldTitle(editingField) || editingField}</Text>
             <TextInput
-              style={styles.modalInput}
+              style={[styles.modalInput, editError && styles.modalInputError]}
               value={editValue}
-              onChangeText={setEditValue}
-              placeholder={`Введите ${editingField}`}
+              onChangeText={handleEditValueChange}
+              placeholder={
+                editingField === 'birthDate' ? 'Дата рождения (ДД.ММ.ГГГГ)' :
+                editingField === 'iin' ? 'ИИН (12 цифр)' :
+                editingField === 'phone' ? '+7 (___) ___-__-__' :
+                `Введите ${(getFieldTitle(editingField) || editingField || '').toLowerCase()}`
+              }
               placeholderTextColor="#999"
+              keyboardType={editingField === 'birthDate' || editingField === 'iin' || editingField === 'phone' ? 'numeric' : 'default'}
+              maxLength={editingField === 'birthDate' ? 10 : editingField === 'iin' ? 12 : editingField === 'phone' ? 18 : undefined}
             />
+            {editError && editingField === 'birthDate' && (
+              <Text style={styles.modalErrorText}>
+                Введите корректную дату рождения (ДД.ММ.ГГГГ)
+              </Text>
+            )}
+            {editError && editingField === 'iin' && (
+              <Text style={styles.modalErrorText}>
+                ИИН должен содержать ровно 12 цифр
+              </Text>
+            )}
             <View style={styles.modalButtons}>
               <TouchableOpacity style={styles.modalButtonCancel} onPress={handleCancelEdit}>
                 <Text style={styles.modalButtonTextCancel}>Отмена</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.modalButtonSave} onPress={handleSaveEdit}>
-                <Text style={styles.modalButtonTextSave}>Сохранить</Text>
+              <TouchableOpacity 
+                style={[styles.modalButtonSave, editError && styles.modalButtonSaveDisabled]} 
+                onPress={handleSaveEdit}
+                disabled={editError}
+              >
+                <Text style={[styles.modalButtonTextSave, editError && styles.modalButtonTextSaveDisabled]}>Сохранить</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -418,7 +751,7 @@ export default function ProfileScreen({ onBack }) {
                   </LinearGradient>
                 </TouchableOpacity>
               )}
-              
+
               <TouchableOpacity style={styles.photoActionButton} onPress={() => setShowPhotoModal(false)}>
                 <LinearGradient colors={['#999', '#666']} style={styles.photoActionGradient}>
                   <Text style={{ color: "#ffffff", fontSize: 16 }}>✕</Text>
@@ -488,6 +821,9 @@ const styles = StyleSheet.create({
   scrollContent: {
     flex: 1,
     paddingHorizontal: 20,
+  },
+  scrollContentContainer: {
+    paddingBottom: 120, // Отступ для нижней панели навигации
   },
   section: {
     marginTop: 25,
@@ -691,6 +1027,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     fontFamily: 'Open Sauce',
+  },
+  modalInputError: {
+    borderColor: '#ff4444',
+    borderWidth: 2,
+  },
+  modalErrorText: {
+    fontSize: 12,
+    color: '#ff4444',
+    marginTop: 5,
+    marginBottom: 10,
+    fontFamily: 'Open Sauce',
+  },
+  modalButtonSaveDisabled: {
+    backgroundColor: '#cccccc',
+  },
+  modalButtonTextSaveDisabled: {
+    color: '#999999',
   },
   photoEditIcon: {
     position: 'absolute',

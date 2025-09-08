@@ -8,15 +8,17 @@ import {
   Animated,
   TextInput,
   Alert,
+  BackHandler,
   Modal,
-  Platform
+  Platform,
+  TouchableWithoutFeedback
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import LocalIcons from '../components/LocalIcons';
 
-export default function AnalysesScreen({ navigation }) {
+export default function AnalysesScreen({ navigation, onBack }) {
   const [analyses, setAnalyses] = useState([
     {
       id: 1,
@@ -54,15 +56,58 @@ export default function AnalysesScreen({ navigation }) {
       comment: 'Синусовый ритм, ЧСС 72 уд/мин. Патологических изменений не выявлено.',
       uploadDate: '2025-08-05',
     },
+    {
+      id: 4,
+      file: {
+        uri: 'https://via.placeholder.com/300x200/ff8c42/ffffff?text=УЗИ',
+        type: 'photo',
+        name: 'УЗИ брюшной полости'
+      },
+      date: '2025-07-28',
+      clinicName: 'Диагностический центр',
+      comment: 'Печень, желчный пузырь, поджелудочная железа без патологий. Селезенка в норме.',
+      uploadDate: '2025-07-28',
+    },
+    {
+      id: 5,
+      file: {
+        uri: 'https://via.placeholder.com/300x200/9ad0e7/ffffff?text=Гормоны',
+        type: 'pdf',
+        name: 'Анализ на гормоны щитовидной железы.pdf'
+      },
+      date: '2025-07-20',
+      clinicName: 'Эндокринологический центр',
+      comment: 'ТТГ, Т3, Т4 в пределах нормы. Патологических изменений не выявлено.',
+      uploadDate: '2025-07-20',
+    },
+    {
+      id: 6,
+      file: {
+        uri: 'https://via.placeholder.com/300x200/60caac/ffffff?text=Моча',
+        type: 'photo',
+        name: 'Общий анализ мочи'
+      },
+      date: '2025-07-15',
+      clinicName: 'Лаборатория "Здоровье"',
+      comment: 'Цвет, прозрачность, плотность в норме. Белок, глюкоза, кетоны не обнаружены.',
+      uploadDate: '2025-07-15',
+    },
   ]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [clinicName, setClinicName] = useState('');
   const [comment, setComment] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
+  const [sortOrder, setSortOrder] = useState('newest'); // 'newest' или 'oldest'
+  const [showSortMenu, setShowSortMenu] = useState(false);
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
+
+  // Статистика анализов
+  const totalAnalyses = analyses.length;
+  const pdfAnalyses = analyses.filter(analysis => analysis.file.type === 'pdf').length;
+  const photoAnalyses = analyses.filter(analysis => analysis.file.type === 'photo').length;
 
   useEffect(() => {
     Animated.parallel([
@@ -78,6 +123,19 @@ export default function AnalysesScreen({ navigation }) {
       }),
     ]).start();
   }, []);
+
+  // Обработка системной кнопки "Назад"
+  useEffect(() => {
+    const backAction = () => {
+      // Возвращаемся на главный экран
+      onBack();
+      return true; // Предотвращаем стандартное поведение
+    };
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+
+    return () => backHandler.remove();
+  }, [onBack]);
 
   const requestPermissions = async () => {
     if (Platform.OS !== 'web') {
@@ -176,6 +234,24 @@ export default function AnalysesScreen({ navigation }) {
     setComment('');
   };
 
+  const handleSortSelect = (order) => {
+    setSortOrder(order);
+    setShowSortMenu(false);
+  };
+
+  const getSortLabel = () => {
+    return sortOrder === 'newest' ? 'Новые' : 'Старые';
+  };
+
+  // Функция для сортировки данных
+  const getSortedAnalyses = () => {
+    return [...analyses].sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+    });
+  };
+
   const deleteAnalysis = (id) => {
     Alert.alert(
       'Удаление анализа',
@@ -255,26 +331,106 @@ export default function AnalysesScreen({ navigation }) {
   );
 
   return (
-    <View style={styles.container}>
-      <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+    <TouchableWithoutFeedback onPress={() => setShowSortMenu(false)}>
+      <View style={styles.container}>
+        <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
         {/* Заголовок */}
         <LinearGradient colors={['#0863a7', '#074393']} style={styles.header}>
           <View style={styles.headerContent}>
+            <TouchableOpacity onPress={onBack} style={styles.backButton}>
+              {LocalIcons.arrowBack({ size: 24, color: '#ffffff' })}
+            </TouchableOpacity>
+            
             <Text style={styles.headerTitle}>Мои анализы</Text>
             
-            <TouchableOpacity 
-              style={styles.addButton}
-              onPress={() => setShowAddModal(true)}
-            >
-              {LocalIcons.plus({ size: 24, color: "#ffffff" })}
-            </TouchableOpacity>
+            <View style={styles.headerButtons}>
+              <TouchableOpacity 
+                style={styles.sortButton}
+                onPress={() => setShowSortMenu(!showSortMenu)}
+              >
+                <Text style={styles.sortButtonText}>{getSortLabel()}</Text>
+                {LocalIcons.chevron({ size: 16, color: "#ffffff" })}
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.addButton}
+                onPress={() => setShowAddModal(true)}
+              >
+                {LocalIcons.plus({ size: 24, color: "#ffffff" })}
+              </TouchableOpacity>
+            </View>
           </View>
         </LinearGradient>
 
+        {/* Выпадающее меню сортировки */}
+        {showSortMenu && (
+          <View style={styles.sortMenu}>
+            <TouchableOpacity 
+              style={styles.sortMenuItem}
+              onPress={() => handleSortSelect('newest')}
+            >
+              <Text style={[
+                styles.sortMenuItemText,
+                sortOrder === 'newest' && styles.sortMenuItemTextActive
+              ]}>
+                Новые сначала
+              </Text>
+              {sortOrder === 'newest' && (
+                <Text style={styles.sortMenuItemCheck}>✓</Text>
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.sortMenuItem}
+              onPress={() => handleSortSelect('oldest')}
+            >
+              <Text style={[
+                styles.sortMenuItemText,
+                sortOrder === 'oldest' && styles.sortMenuItemTextActive
+              ]}>
+                Старые сначала
+              </Text>
+              {sortOrder === 'oldest' && (
+                <Text style={styles.sortMenuItemCheck}>✓</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Статистика */}
+        <View style={styles.statsContainer}>
+          <View style={styles.statItem}>
+            <LinearGradient colors={['#22ae2c', '#5cc72f']} style={styles.statIcon}>
+              {LocalIcons.document({ size: 24, color: "#ffffff" })}
+            </LinearGradient>
+            <Text style={styles.statNumber}>{totalAnalyses}</Text>
+            <Text style={styles.statLabel}>Всего анализов</Text>
+          </View>
+          
+          <View style={styles.statItem}>
+            <LinearGradient colors={['#ff6b35', '#ff8c42']} style={styles.statIcon}>
+              {LocalIcons.image({ size: 24, color: "#ffffff" })}
+            </LinearGradient>
+            <Text style={styles.statNumber}>{photoAnalyses}</Text>
+            <Text style={styles.statLabel}>Фото</Text>
+          </View>
+          
+          <View style={styles.statItem}>
+            <LinearGradient colors={['#ff4444', '#d32f2f']} style={styles.statIcon}>
+              {LocalIcons.document({ size: 24, color: "#ffffff" })}
+            </LinearGradient>
+            <Text style={styles.statNumber}>{pdfAnalyses}</Text>
+            <Text style={styles.statLabel}>PDF</Text>
+          </View>
+        </View>
+
         {/* Список анализов */}
-        <ScrollView style={styles.analysesList} showsVerticalScrollIndicator={false}>
+        <ScrollView 
+          style={styles.analysesList} 
+          contentContainerStyle={styles.analysesListContent}
+          showsVerticalScrollIndicator={false}
+        >
           {analyses.length > 0 ? (
-            analyses.map(renderAnalysisCard)
+            getSortedAnalyses().map(renderAnalysisCard)
           ) : (
             <View style={styles.emptyState}>
               <View style={styles.emptyIcon}>
@@ -287,10 +443,10 @@ export default function AnalysesScreen({ navigation }) {
             </View>
           )}
         </ScrollView>
-      </Animated.View>
+        </Animated.View>
 
-      {/* Модальное окно добавления */}
-      <Modal
+        {/* Модальное окно добавления */}
+        <Modal
         visible={showAddModal}
         animationType="slide"
         presentationStyle="pageSheet"
@@ -408,8 +564,9 @@ export default function AnalysesScreen({ navigation }) {
             </TouchableOpacity>
           </View>
         </View>
-      </Modal>
-    </View>
+        </Modal>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -431,6 +588,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  backButton: {
+    marginRight: 15,
+    padding: 5,
+  },
   headerTitle: {
     fontSize: 20,
     fontFamily: 'Open Sauce',
@@ -441,10 +602,48 @@ const styles = StyleSheet.create({
   addButton: {
     padding: 5,
   },
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  statItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  statIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  statNumber: {
+    fontSize: 18,
+    fontFamily: 'Open Sauce',
+    fontWeight: 'bold',
+    color: '#333333',
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 12,
+    fontFamily: 'Open Sauce',
+    color: '#666666',
+    textAlign: 'center',
+    lineHeight: 16,
+  },
   analysesList: {
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 20,
+  },
+  analysesListContent: {
+    paddingBottom: 120, // Отступ для нижней панели навигации
   },
   analysisCard: {
     backgroundColor: '#ffffff',
@@ -710,5 +909,66 @@ const styles = StyleSheet.create({
     fontFamily: 'Open Sauce',
     fontWeight: 'bold',
     color: '#ffffff',
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sortButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    marginRight: 8,
+  },
+  sortButtonText: {
+    fontSize: 12,
+    fontFamily: 'Open Sauce',
+    color: '#ffffff',
+    fontWeight: '500',
+    marginRight: 4,
+  },
+  sortMenu: {
+    position: 'absolute',
+    top: 120,
+    right: 20,
+    backgroundColor: '#ffffff',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    zIndex: 1000,
+    minWidth: 150,
+  },
+  sortMenuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  sortMenuItemText: {
+    fontSize: 14,
+    fontFamily: 'Open Sauce',
+    color: '#333333',
+    fontWeight: '500',
+  },
+  sortMenuItemTextActive: {
+    color: '#0863a7',
+    fontWeight: '600',
+  },
+  sortMenuItemCheck: {
+    fontSize: 16,
+    color: '#0863a7',
+    fontWeight: 'bold',
   },
 });

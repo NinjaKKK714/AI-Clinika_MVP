@@ -8,15 +8,18 @@ import {
   Animated,
   Image,
   Dimensions,
+  BackHandler,
   Alert,
-  Linking
+  Linking,
+  Platform
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import MapView, { Marker } from 'react-native-maps';
 import LocalIcons from '../components/LocalIcons';
 
 const { width, height } = Dimensions.get('window');
 
-export default function ClinicDetailScreen({ route, navigation }) {
+export default function ClinicDetailScreen({ route, navigation, onBack }) {
   const { clinic } = route.params;
   const [isFavorite, setIsFavorite] = useState(false);
   
@@ -37,6 +40,19 @@ export default function ClinicDetailScreen({ route, navigation }) {
       }),
     ]).start();
   }, []);
+
+  // Обработка системной кнопки "Назад"
+  useEffect(() => {
+    const backAction = () => {
+      // Возвращаемся на экран клиник
+      onBack();
+      return true; // Предотвращаем стандартное поведение
+    };
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+
+    return () => backHandler.remove();
+  }, [onBack]);
 
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
@@ -119,7 +135,11 @@ export default function ClinicDetailScreen({ route, navigation }) {
           </View>
         </LinearGradient>
 
-        <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <ScrollView 
+          style={styles.scrollContent} 
+          contentContainerStyle={styles.scrollContentContainer}
+          showsVerticalScrollIndicator={false}
+        >
           {/* Изображение клиники */}
           <View style={styles.imageContainer}>
             <Image
@@ -167,13 +187,87 @@ export default function ClinicDetailScreen({ route, navigation }) {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Расположение</Text>
             <View style={styles.mapContainer}>
-              <LinearGradient colors={['#f8f9fa', '#e9ecef']} style={styles.mapPlaceholder}>
-                <View style={styles.mapContent}>
-                  {LocalIcons.location({ size: 48, color: "#0863a7" })}
-                  <Text style={styles.mapText}>Карта</Text>
-                  <Text style={styles.mapSubtext}>Координаты: {clinic.coordinates.latitude}, {clinic.coordinates.longitude}</Text>
+              {clinic.coordinates && clinic.coordinates.latitude && clinic.coordinates.longitude ? (
+                <>
+                  {MapView && Marker && Platform.OS !== 'web' ? (
+                    <MapView
+                      style={styles.map}
+                      initialRegion={{
+                        latitude: clinic.coordinates.latitude,
+                        longitude: clinic.coordinates.longitude,
+                        latitudeDelta: 0.01,
+                        longitudeDelta: 0.01,
+                      }}
+                      showsUserLocation={true}
+                      showsMyLocationButton={true}
+                      showsCompass={true}
+                      showsScale={true}
+                      onMapReady={() => {
+                        console.log('Map is ready');
+                      }}
+                      onError={(error) => {
+                        console.error('Map error:', error);
+                      }}
+                      onMapLoaded={() => {
+                        console.log('Map loaded successfully');
+                      }}
+                    >
+                      <Marker
+                        coordinate={{
+                          latitude: clinic.coordinates.latitude,
+                          longitude: clinic.coordinates.longitude,
+                        }}
+                        title={clinic.name}
+                        description={clinic.location}
+                        pinColor="#0863a7"
+                      />
+                    </MapView>
+                  ) : (
+                    <View style={styles.mapPlaceholder}>
+                      <Text style={styles.mapPlaceholderText}>Карта недоступна</Text>
+                      <Text style={styles.mapPlaceholderSubtext}>Нажмите для открытия в браузере</Text>
+                    </View>
+                  )}
+                  
+                  {/* Информация о клинике на карте */}
+                  <View style={styles.mapInfoOverlay}>
+                    <View style={styles.mapInfoContent}>
+                      <Text style={styles.mapInfoTitle}>{clinic.name}</Text>
+                      <Text style={styles.mapInfoAddress}>{clinic.location}</Text>
+                      <TouchableOpacity 
+                        style={styles.mapDirectionsButton}
+                        onPress={() => {
+                          const url = `https://www.google.com/maps/dir/?api=1&destination=${clinic.coordinates.latitude},${clinic.coordinates.longitude}`;
+                          Linking.openURL(url);
+                        }}
+                      >
+                        <LinearGradient colors={['#0863a7', '#074393']} style={styles.mapDirectionsGradient}>
+                          <Text style={styles.mapDirectionsText}>Построить маршрут</Text>
+                        </LinearGradient>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </>
+              ) : (
+                <View style={styles.mapPlaceholder}>
+                  <View style={styles.mapContent}>
+                    {LocalIcons.location({ size: 48, color: "#0863a7" })}
+                    <Text style={styles.mapText}>Карта недоступна</Text>
+                    <Text style={styles.mapSubtext}>Координаты не указаны</Text>
+                    <TouchableOpacity 
+                      style={styles.mapDirectionsButton}
+                      onPress={() => {
+                        const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(clinic.location)}`;
+                        Linking.openURL(url);
+                      }}
+                    >
+                      <LinearGradient colors={['#0863a7', '#074393']} style={styles.mapDirectionsGradient}>
+                        <Text style={styles.mapDirectionsText}>Открыть в Google Maps</Text>
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  </View>
                 </View>
-              </LinearGradient>
+              )}
             </View>
           </View>
 
@@ -228,6 +322,9 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flex: 1,
+  },
+  scrollContentContainer: {
+    paddingBottom: 120, // Отступ для нижней панели навигации
   },
   imageContainer: {
     position: 'relative',
@@ -349,11 +446,96 @@ const styles = StyleSheet.create({
   mapContainer: {
     borderRadius: 15,
     overflow: 'hidden',
+    position: 'relative',
+  },
+  map: {
+    height: 250,
+    width: '100%',
   },
   mapPlaceholder: {
-    height: 200,
+    height: 250,
+    width: '100%',
+    backgroundColor: '#f0f0f0',
     justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 15,
+  },
+  mapPlaceholderText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#666666',
+    marginBottom: 5,
+  },
+  mapPlaceholderSubtext: {
+    fontSize: 14,
+    color: '#999999',
+  },
+  mapInfoOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: -2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  mapInfoContent: {
+    alignItems: 'center',
+  },
+  mapInfoTitle: {
+    fontSize: 16,
+    fontFamily: 'Open Sauce',
+    fontWeight: '700',
+    color: '#333333',
+    marginBottom: 5,
+    textAlign: 'center',
+  },
+  mapInfoAddress: {
+    fontSize: 14,
+    fontFamily: 'Open Sauce',
+    color: '#666666',
+    marginBottom: 15,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  mapDirectionsButton: {
+    borderRadius: 20,
+    overflow: 'hidden',
+    shadowColor: '#0863a7',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  mapDirectionsGradient: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+  },
+  mapDirectionsText: {
+    fontSize: 14,
+    fontFamily: 'Open Sauce',
+    fontWeight: '600',
+    color: '#ffffff',
+  },
+  mapPlaceholder: {
+    height: 250,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    borderRadius: 15,
   },
   mapContent: {
     alignItems: 'center',
@@ -401,5 +583,6 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
 });
+
 
 
