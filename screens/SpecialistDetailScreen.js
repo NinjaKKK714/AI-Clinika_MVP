@@ -561,7 +561,7 @@ const createStyles = (colors) => StyleSheet.create({
     fontSize: 24,
     fontFamily: 'Open Sauce',
     fontWeight: '700',
-    color: '#333',
+    color: colors.textPrimary,
     marginBottom: 5,
   },
   specialistSpecialization: {
@@ -602,14 +602,14 @@ const createStyles = (colors) => StyleSheet.create({
     fontSize: 18,
     fontFamily: 'Open Sauce',
     fontWeight: '700',
-    color: '#333',
+    color: colors.textPrimary,
     marginBottom: 18,
     marginTop: 5,
   },
   description: {
     fontSize: 16,
     fontFamily: 'Open Sauce',
-    color: '#666',
+    color: colors.textSecondary,
     lineHeight: 24,
   },
   infoItem: {
@@ -639,13 +639,13 @@ const createStyles = (colors) => StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Open Sauce',
     fontWeight: '600',
-    color: '#333',
+    color: colors.textPrimary,
     marginBottom: 2,
   },
   infoValue: {
     fontSize: 14,
     fontFamily: 'Open Sauce',
-    color: '#666',
+    color: colors.textSecondary,
   },
   actionButton: {
     padding: 8,
