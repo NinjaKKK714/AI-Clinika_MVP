@@ -2277,7 +2277,7 @@ const createStyles = (colors) => StyleSheet.create({
   languageDropdown: {
     position: 'absolute',
     top: 40,
-    right: -50,
+    right: 50,
     backgroundColor: '#ffffff',
     borderRadius: 10,
     borderWidth: 1,
