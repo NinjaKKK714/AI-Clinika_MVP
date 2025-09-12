@@ -32,18 +32,22 @@ export default function ClinicsScreen({ navigation, onBack }) {
 
 
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 1000,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    try {
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } catch (error) {
+      console.error('Animation error:', error);
+    }
 
     // Обработчик системной кнопки "Назад" на Android
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -55,7 +59,11 @@ export default function ClinicsScreen({ navigation, onBack }) {
     });
 
     return () => {
-      backHandler.remove();
+      try {
+        backHandler.remove();
+      } catch (error) {
+        console.error('BackHandler remove error:', error);
+      }
     };
   }, [onBack]);
 
@@ -534,12 +542,13 @@ export default function ClinicsScreen({ navigation, onBack }) {
   };
 
   const renderClinicCard = (clinic) => {
-    if (!clinic) {
-      console.error('Clinic data is null or undefined');
-      return null;
-    }
-    
-    return (
+    try {
+      if (!clinic) {
+        console.error('Clinic data is null or undefined');
+        return null;
+      }
+      
+      return (
       <TouchableOpacity 
         key={clinic.id} 
         style={styles.clinicCard}
@@ -609,15 +618,20 @@ export default function ClinicsScreen({ navigation, onBack }) {
       </View>
     </TouchableOpacity>
     );
+    } catch (error) {
+      console.error('Error rendering clinic card:', error);
+      return null;
+    }
   };
 
   const renderSpecialistCard = (specialist) => {
-    if (!specialist) {
-      console.error('Specialist data is null or undefined');
-      return null;
-    }
-    
-    return (
+    try {
+      if (!specialist) {
+        console.error('Specialist data is null or undefined');
+        return null;
+      }
+      
+      return (
       <TouchableOpacity 
         key={specialist.id} 
         style={styles.clinicCard}
@@ -687,15 +701,20 @@ export default function ClinicsScreen({ navigation, onBack }) {
       </View>
     </TouchableOpacity>
     );
+    } catch (error) {
+      console.error('Error rendering specialist card:', error);
+      return null;
+    }
   };
 
   const renderCheckupCard = (checkup) => {
-    if (!checkup) {
-      console.error('Checkup data is null or undefined');
-      return null;
-    }
-    
-    return (
+    try {
+      if (!checkup) {
+        console.error('Checkup data is null or undefined');
+        return null;
+      }
+      
+      return (
       <TouchableOpacity 
         key={checkup.id} 
         style={styles.clinicCard}
@@ -770,11 +789,16 @@ export default function ClinicsScreen({ navigation, onBack }) {
       </View>
     </TouchableOpacity>
     );
+    } catch (error) {
+      console.error('Error rendering checkup card:', error);
+      return null;
+    }
   };
 
-  return (
-    <View style={styles.container}>
-      <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+  try {
+    return (
+      <View style={styles.container}>
+        <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
         {/* Заголовок */}
         <LinearGradient colors={isDarkMode ? [colors.primary, colors.primaryDark] : ['#0863a7', '#074393']} style={styles.header}>
           <View style={styles.headerContent}>
@@ -908,6 +932,16 @@ export default function ClinicsScreen({ navigation, onBack }) {
       </Animated.View>
     </View>
   );
+  } catch (error) {
+    console.error('Error rendering ClinicsScreen:', error);
+    return (
+      <View style={styles.container}>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>Произошла ошибка при загрузке экрана</Text>
+        </View>
+      </View>
+    );
+  }
 }
 
 const createStyles = (colors) => StyleSheet.create({
@@ -1202,5 +1236,17 @@ const createStyles = (colors) => StyleSheet.create({
     color: colors.textSecondary,
     marginLeft: 8,
     opacity: 0.8,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    fontFamily: 'Open Sauce',
+    color: colors.textPrimary,
+    textAlign: 'center',
   },
 });
