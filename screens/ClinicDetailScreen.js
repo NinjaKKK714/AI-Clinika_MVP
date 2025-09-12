@@ -23,8 +23,22 @@ const { width, height } = Dimensions.get('window');
 export default function ClinicDetailScreen({ route, navigation, onBack }) {
   const { colors, isDarkMode } = useTheme();
   const styles = createStyles(colors);
-  const { clinic } = route.params;
+  
+  // Безопасное получение данных клиники
+  const clinic = route?.params?.clinic || null;
   const [isFavorite, setIsFavorite] = useState(false);
+  
+  // Проверяем, что данные клиники доступны
+  if (!clinic) {
+    console.error('Clinic data not available in ClinicDetailScreen');
+    return (
+      <View style={styles.container}>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>Данные клиники не найдены</Text>
+        </View>
+      </View>
+    );
+  }
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
@@ -584,6 +598,18 @@ const createStyles = (colors) => StyleSheet.create({
     fontFamily: 'Open Sauce',
     fontWeight: 'bold',
     color: '#ffffff',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    fontFamily: 'Open Sauce',
+    color: colors.textPrimary,
+    textAlign: 'center',
   },
 });
 

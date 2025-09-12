@@ -554,13 +554,20 @@ export default function ClinicsScreen({ navigation, onBack }) {
         style={styles.clinicCard}
         onPress={() => {
           try {
+            console.log('Clinic card pressed:', clinic);
             if (navigation && navigation.navigate && clinic) {
+              console.log('Navigating to ClinicDetail with clinic:', clinic);
               navigation.navigate('ClinicDetail', { clinic });
             } else {
-              console.error('Navigation or clinic data not available');
+              console.error('Navigation or clinic data not available:', {
+                navigation: !!navigation,
+                navigate: !!(navigation && navigation.navigate),
+                clinic: !!clinic
+              });
             }
           } catch (error) {
             console.error('Error navigating to clinic detail:', error);
+            Alert.alert('Ошибка', 'Не удалось открыть детали клиники');
           }
         }}
       >
