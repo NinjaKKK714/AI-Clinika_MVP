@@ -998,12 +998,12 @@ const createStyles = (colors) => StyleSheet.create({
   statNumber: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
     fontFamily: 'Open Sauce',
   },
   statLabel: {
     fontSize: 12,
-    color: '#666',
+    color: colors.textSecondary,
     fontFamily: 'Open Sauce',
     marginTop: 2,
   },
