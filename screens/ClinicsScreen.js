@@ -1179,7 +1179,7 @@ const createStyles = (colors) => StyleSheet.create({
     fontSize: 18,
     fontFamily: 'Open Sauce',
     fontWeight: 'bold',
-    color: colors.textSecondary,
+    color: colors.textPrimary,
     marginBottom: 5,
   },
   specialistServices: {
