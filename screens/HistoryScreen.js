@@ -18,8 +18,11 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import LocalIcons from '../components/LocalIcons';
+import { useTheme } from '../themes/useTheme';
 
 export default function HistoryScreen({ activeTab, setActiveTab, onBack }) {
+  const { colors, isDarkMode } = useTheme();
+  const styles = createStyles(colors);
   const [showAddModal, setShowAddModal] = useState(false);
   const [modalType, setModalType] = useState('prevention');
   const [formData, setFormData] = useState({});
@@ -29,6 +32,7 @@ export default function HistoryScreen({ activeTab, setActiveTab, onBack }) {
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
+
 
   useEffect(() => {
     Animated.parallel([
@@ -519,13 +523,15 @@ export default function HistoryScreen({ activeTab, setActiveTab, onBack }) {
                 <Text style={styles.headerTitle}>История</Text>
                 <Text style={styles.headerSubtitle}>Медицинская история</Text>
               </View>
-              <TouchableOpacity 
-                style={styles.sortButton}
-                onPress={() => setShowSortMenu(!showSortMenu)}
-              >
-                <Text style={styles.sortButtonText}>{getSortLabel()}</Text>
-                {LocalIcons.chevron({ size: 16, color: "#ffffff" })}
-              </TouchableOpacity>
+              <View style={styles.headerButtons}>
+                <TouchableOpacity 
+                  style={styles.sortButton}
+                  onPress={() => setShowSortMenu(!showSortMenu)}
+                >
+                  <Text style={styles.sortButtonText}>{getSortLabel()}</Text>
+                  {LocalIcons.chevron({ size: 16, color: "#ffffff" })}
+                </TouchableOpacity>
+              </View>
             </View>
           </LinearGradient>
 
@@ -762,10 +768,10 @@ export default function HistoryScreen({ activeTab, setActiveTab, onBack }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.backgroundSecondary,
   },
   content: {
     flex: 1,
@@ -778,6 +784,11 @@ const styles = StyleSheet.create({
   headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
   },
   backButton: {
     marginRight: 15,
@@ -800,7 +811,7 @@ const styles = StyleSheet.create({
     opacity: 0.9,
   },
   dropdownContainer: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     paddingHorizontal: 20,
     paddingVertical: 15,
     shadowColor: '#000',
@@ -816,18 +827,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.backgroundSecondary,
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: colors.border,
   },
   dropdownButtonText: {
     fontSize: 16,
     fontFamily: 'Open Sauce',
     fontWeight: '600',
-    color: '#333333',
+    color: colors.textPrimary,
   },
   dropdownArrow: {
     transform: [{ rotate: '0deg' }],
@@ -848,7 +859,7 @@ const styles = StyleSheet.create({
     top: '100%',
     left: 0,
     right: 0,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     borderRadius: 12,
     marginTop: 5,
     shadowColor: '#000',
@@ -858,7 +869,7 @@ const styles = StyleSheet.create({
     elevation: 15,
     zIndex: 9999,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: colors.border,
     overflow: 'hidden',
   },
   dropdownItem: {
@@ -877,10 +888,10 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: 'Open Sauce',
     fontWeight: '500',
-    color: '#333333',
+    color: colors.textPrimary,
   },
   dropdownItemTextActive: {
-    color: '#0863a7',
+    color: colors.primary,
     fontWeight: '600',
   },
   body: {
@@ -903,7 +914,7 @@ const styles = StyleSheet.create({
   tabDescription: {
     fontSize: 14,
     fontFamily: 'Open Sauce',
-    color: '#666',
+    color: colors.textSecondary,
     marginBottom: 15,
     lineHeight: 20,
   },
@@ -922,7 +933,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   historyItem: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     borderRadius: 12,
     padding: 20,
     marginBottom: 15,
@@ -942,7 +953,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Open Sauce',
     fontWeight: '600',
-    color: '#333',
+    color: colors.textPrimary,
   },
   statusBadge: {
     paddingHorizontal: 12,
@@ -967,31 +978,31 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Open Sauce',
     fontWeight: '600',
-    color: '#666',
+    color: colors.textSecondary,
     width: 120,
     flexShrink: 0,
   },
   infoValue: {
     fontSize: 14,
     fontFamily: 'Open Sauce',
-    color: '#333',
+    color: colors.textPrimary,
     flex: 1,
   },
   medicationsSection: {
     marginTop: 15,
     paddingTop: 15,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: colors.border,
   },
   sectionTitle: {
     fontSize: 16,
     fontFamily: 'Open Sauce',
     fontWeight: '600',
-    color: '#333',
+    color: colors.textPrimary,
     marginBottom: 10,
   },
   medicationItem: {
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.backgroundSecondary,
     padding: 10,
     borderRadius: 8,
     marginBottom: 8,
@@ -1015,7 +1026,7 @@ const styles = StyleSheet.create({
     borderTopColor: '#f0f0f0',
   },
   procedureItem: {
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.backgroundSecondary,
     padding: 10,
     borderRadius: 8,
     marginBottom: 8,
@@ -1054,7 +1065,7 @@ const styles = StyleSheet.create({
     }),
   },
   modalContent: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     borderRadius: 15,
     padding: 0,
     width: '90%',
@@ -1087,8 +1098,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Open Sauce',
     marginBottom: 15,
-    backgroundColor: '#ffffff',
-    color: '#333333',
+    backgroundColor: colors.background,
+    color: colors.textPrimary,
     ...Platform.select({
       android: {
         textAlignVertical: 'top',
@@ -1150,7 +1161,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 120,
     right: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     borderRadius: 8,
     shadowColor: '#000',
     shadowOffset: {
@@ -1175,16 +1186,16 @@ const styles = StyleSheet.create({
   sortMenuItemText: {
     fontSize: 14,
     fontFamily: 'Open Sauce',
-    color: '#333333',
+    color: colors.textPrimary,
     fontWeight: '500',
   },
   sortMenuItemTextActive: {
-    color: '#0863a7',
+    color: colors.primary,
     fontWeight: '600',
   },
   sortMenuItemCheck: {
     fontSize: 16,
-    color: '#0863a7',
+    color: colors.primary,
     fontWeight: 'bold',
   },
 });

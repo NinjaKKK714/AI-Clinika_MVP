@@ -126,3 +126,6 @@ class ApiClient {
 
 // Создаем глобальный экземпляр API клиента
 window.apiClient = new ApiClient();
+
+
+

@@ -16,10 +16,13 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Calendar from 'expo-calendar';
 import LocalIcons from '../components/LocalIcons';
+import { useTheme } from '../themes/useTheme';
 
 const { width, height } = Dimensions.get('window');
 
 export default function SpecialistDetailScreen({ route, navigation, onBack }) {
+  const { colors, isDarkMode } = useTheme();
+  const styles = createStyles(colors);
   const { specialist } = route.params;
   const [isFavorite, setIsFavorite] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
@@ -502,7 +505,7 @@ export default function SpecialistDetailScreen({ route, navigation, onBack }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'transparent',
@@ -564,7 +567,7 @@ const styles = StyleSheet.create({
   specialistSpecialization: {
     fontSize: 16,
     fontFamily: 'Open Sauce',
-    color: '#0863a7',
+    color: colors.primary,
     marginBottom: 10,
   },
   ratingContainer: {
@@ -617,7 +620,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: colors.border,
   },
   infoIcon: {
     marginRight: 15,
@@ -675,7 +678,7 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   modalContent: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
     maxHeight: '85%',
@@ -715,11 +718,11 @@ const styles = StyleSheet.create({
   closeButton: {
     padding: 8,
     borderRadius: 20,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.backgroundSecondary,
   },
   modalBody: {
     padding: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
   },
   modalBodyContent: {
     paddingBottom: 20, // Отступ для модального окна
@@ -733,10 +736,10 @@ const styles = StyleSheet.create({
     padding: 15,
     marginRight: 10,
     borderRadius: 16,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.backgroundSecondary,
     minWidth: 75,
     borderWidth: 2,
-    borderColor: '#e0e0e0',
+    borderColor: colors.border,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -791,10 +794,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     marginBottom: 12,
     borderRadius: 12,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.backgroundSecondary,
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#e0e0e0',
+    borderColor: colors.border,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -828,11 +831,11 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 16,
     borderRadius: 25,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.backgroundSecondary,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#e0e0e0',
+    borderColor: colors.border,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -874,13 +877,13 @@ const styles = StyleSheet.create({
   },
   calendarStatus: {
     padding: 20,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.backgroundSecondary,
     borderRadius: 16,
     marginTop: 25,
     marginBottom: 25,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: colors.border,
   },
   calendarStatusText: {
     fontSize: 15,
@@ -918,12 +921,12 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   calendarStatusContainer: {
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.backgroundSecondary,
     borderRadius: 8,
     padding: 12,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: '#e9ecef',
+    borderColor: colors.border,
   },
   calendarStatusRow: {
     flexDirection: 'row',

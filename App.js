@@ -8,10 +8,15 @@ import AuthScreen from './screens/AuthScreen';
 import HomeScreen from './screens/HomeScreen';
 import StorageService from './services/storageService';
 
-export default function App() {
+// Импорт темы
+import { ThemeProvider, useTheme } from './themes/ThemeContext';
+
+// Основной компонент приложения с темой
+function AppContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const { isDarkMode, isLoading: themeLoading } = useTheme();
 
   useEffect(() => {
     checkAuthentication();
@@ -41,10 +46,15 @@ export default function App() {
     setIsAuthenticated(false);
   };
 
+  // Ждем загрузки темы
+  if (themeLoading) {
+    return null;
+  }
+
   if (isLoading || checkingAuth) {
     return (
       <>
-        <StatusBar style="light" />
+        <StatusBar style={isDarkMode ? "light" : "dark"} />
         <SplashScreen onFinish={handleSplashFinish} />
       </>
     );
@@ -53,7 +63,7 @@ export default function App() {
   if (!isAuthenticated) {
     return (
       <>
-        <StatusBar style="light" />
+        <StatusBar style={isDarkMode ? "light" : "dark"} />
         <AuthScreen onAuthSuccess={handleAuthSuccess} />
       </>
     );
@@ -61,9 +71,18 @@ export default function App() {
 
   return (
     <>
-      <StatusBar style="light" />
+      <StatusBar style={isDarkMode ? "light" : "dark"} />
       <HomeScreen onLogout={handleLogout} />
     </>
+  );
+}
+
+// Главный компонент с провайдером темы
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 }
 

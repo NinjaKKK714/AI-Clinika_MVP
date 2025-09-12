@@ -17,8 +17,11 @@ import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import LocalIcons from '../components/LocalIcons';
 import StorageService from '../services/storageService';
+import { useTheme } from '../themes/useTheme';
 
 export default function ProfileScreen({ onBack, onLogout }) {
+  const { colors, isDarkMode, toggleTheme } = useTheme();
+  const styles = createStyles(colors);
   const [userData, setUserData] = useState({
     fullName: '',
     phone: '',
@@ -37,6 +40,8 @@ export default function ProfileScreen({ onBack, onLogout }) {
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [editError, setEditError] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState('Русский язык');
+  const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
@@ -426,39 +431,39 @@ export default function ProfileScreen({ onBack, onLogout }) {
     }
   };
 
+  const handleLanguageChange = () => {
+    setShowLanguageDropdown(!showLanguageDropdown);
+  };
+
+  const handleLanguageSelect = (language) => {
+    setSelectedLanguage(language);
+    setShowLanguageDropdown(false);
+  };
+
   const handleLogout = () => {
     Alert.alert(
-      'Выход из аккаунта',
-      'Вы уверены, что хотите выйти из аккаунта?',
+      'Закрыть приложение',
+      'Вы уверены, что хотите закрыть приложение?',
       [
         {
           text: 'Отмена',
           style: 'cancel',
         },
         {
-          text: 'Выйти',
+          text: 'Закрыть',
           style: 'destructive',
-          onPress: async () => {
-            try {
-              const logoutSuccess = await StorageService.logout();
-              if (logoutSuccess) {
-                // Возвращаемся к экрану авторизации
-                if (onBack) {
-                  // Сначала возвращаемся к предыдущему экрану
-                  onBack();
-                  // Через небольшую задержку вызываем onLogout, если он передан
-                  setTimeout(() => {
-                    if (onLogout) {
-                      onLogout();
-                    }
-                  }, 100);
-                }
-              } else {
-                Alert.alert('Ошибка', 'Не удалось выйти из аккаунта');
-              }
-            } catch (error) {
-              console.error('Error during logout:', error);
-              Alert.alert('Ошибка', 'Произошла ошибка при выходе из аккаунта');
+          onPress: () => {
+            // Закрываем приложение
+            if (Platform.OS === 'android') {
+              BackHandler.exitApp();
+            } else {
+              // На iOS нет прямого способа закрыть приложение
+              // Показываем сообщение пользователю
+              Alert.alert(
+                'Закрытие приложения',
+                'Нажмите кнопку "Домой" для закрытия приложения',
+                [{ text: 'OK' }]
+              );
             }
           },
         },
@@ -492,7 +497,7 @@ export default function ProfileScreen({ onBack, onLogout }) {
     </View>
   );
 
-  return (
+return (
     <View style={styles.container}>
       <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
         {/* Заголовок */}
@@ -635,12 +640,83 @@ export default function ProfileScreen({ onBack, onLogout }) {
                 </LinearGradient>
               </TouchableOpacity>
               
-              <TouchableOpacity style={styles.actionButton}>
+              <View style={styles.languageButtonContainer}>
+                <TouchableOpacity style={styles.actionButton} onPress={handleLanguageChange}>
+                  <LinearGradient colors={['#9c27b0', '#ba68c8']} style={styles.actionGradient}>
+                    {LocalIcons.globe ? LocalIcons.globe({ size: 20, color: "#ffffff" }) : 
+                      <Text style={{ color: "#ffffff", fontSize: 16 }}>🌐</Text>
+                    }
+                    <Text style={styles.actionText}>{selectedLanguage}</Text>
+                    {LocalIcons.chevron ? LocalIcons.chevron({ 
+                      size: 16, 
+                      color: "#ffffff",
+                      style: { transform: [{ rotate: showLanguageDropdown ? '180deg' : '0deg' }] }
+                    }) : 
+                      <Text style={{ color: "#ffffff", fontSize: 12 }}>{showLanguageDropdown ? '▲' : '▼'}</Text>
+                    }
+                  </LinearGradient>
+                </TouchableOpacity>
+                
+                {showLanguageDropdown && (
+                  <View style={styles.languageDropdown}>
+                    <TouchableOpacity 
+                      style={[styles.languageDropdownOption, selectedLanguage === 'Қазақ тілі' && styles.languageDropdownOptionSelected]} 
+                      onPress={() => handleLanguageSelect('Қазақ тілі')}
+                    >
+                      <Text style={[styles.languageDropdownText, selectedLanguage === 'Қазақ тілі' && styles.languageDropdownTextSelected]}>
+                        Қазақ тілі
+                      </Text>
+                      {selectedLanguage === 'Қазақ тілі' && (
+                        <View style={styles.languageDropdownCheckmark}>
+                          {LocalIcons.checkmark ? LocalIcons.checkmark({ size: 16, color: "#22ae2c" }) : 
+                            <Text style={{ color: "#22ae2c", fontSize: 12 }}>✓</Text>
+                          }
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity 
+                      style={[styles.languageDropdownOption, selectedLanguage === 'Русский язык' && styles.languageDropdownOptionSelected]} 
+                      onPress={() => handleLanguageSelect('Русский язык')}
+                    >
+                      <Text style={[styles.languageDropdownText, selectedLanguage === 'Русский язык' && styles.languageDropdownTextSelected]}>
+                        Русский язык
+                      </Text>
+                      {selectedLanguage === 'Русский язык' && (
+                        <View style={styles.languageDropdownCheckmark}>
+                          {LocalIcons.checkmark ? LocalIcons.checkmark({ size: 16, color: "#22ae2c" }) : 
+                            <Text style={{ color: "#22ae2c", fontSize: 12 }}>✓</Text>
+                          }
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity 
+                      style={[styles.languageDropdownOption, selectedLanguage === 'English' && styles.languageDropdownOptionSelected]} 
+                      onPress={() => handleLanguageSelect('English')}
+                    >
+                      <Text style={[styles.languageDropdownText, selectedLanguage === 'English' && styles.languageDropdownTextSelected]}>
+                        English
+                      </Text>
+                      {selectedLanguage === 'English' && (
+                        <View style={styles.languageDropdownCheckmark}>
+                          {LocalIcons.checkmark ? LocalIcons.checkmark({ size: 16, color: "#22ae2c" }) : 
+                            <Text style={{ color: "#22ae2c", fontSize: 12 }}>✓</Text>
+                          }
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+              
+              <TouchableOpacity style={styles.actionButton} onPress={toggleTheme}>
                 <LinearGradient colors={['#60caac', '#9ad0e7']} style={styles.actionGradient}>
-                  {LocalIcons.settings ? LocalIcons.settings({ size: 20, color: "#ffffff" }) : 
-                    <Text style={{ color: "#ffffff", fontSize: 16 }}>⚙️</Text>
+                  {isDarkMode ? 
+                    LocalIcons.sun({ size: 20, color: "#ffffff" }) : 
+                    LocalIcons.moon({ size: 20, color: "#ffffff" })
                   }
-                  <Text style={styles.actionText}>Настройки</Text>
+                  <Text style={styles.actionText}>{isDarkMode ? 'Светлая тема' : 'Темная тема'}</Text>
                 </LinearGradient>
               </TouchableOpacity>
               
@@ -649,7 +725,7 @@ export default function ProfileScreen({ onBack, onLogout }) {
                   {LocalIcons.logout ? LocalIcons.logout({ size: 20, color: "#ffffff" }) : 
                     <Text style={{ color: "#ffffff", fontSize: 16 }}>🚪</Text>
                   }
-                  <Text style={styles.actionText}>Выйти</Text>
+                  <Text style={styles.actionText}>Закрыть приложение</Text>
                 </LinearGradient>
               </TouchableOpacity>
             </View>
@@ -762,14 +838,15 @@ export default function ProfileScreen({ onBack, onLogout }) {
           </View>
         </View>
       </Modal>
+
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.backgroundSecondary,
   },
   content: {
     flex: 1,
@@ -831,12 +908,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
     fontFamily: 'Open Sauce',
     marginBottom: 15,
   },
   infoContainer: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     borderRadius: 12,
     padding: 15,
     shadowColor: '#000',
@@ -870,13 +947,13 @@ const styles = StyleSheet.create({
   },
   infoTitle: {
     fontSize: 14,
-    color: '#666',
+    color: colors.textSecondary,
     fontFamily: 'Open Sauce',
   },
   infoValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: colors.textPrimary,
     fontFamily: 'Open Sauce',
     marginTop: 2,
   },
@@ -885,7 +962,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     borderRadius: 12,
     padding: 20,
     shadowColor: '#000',
@@ -931,7 +1008,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   actionsContainer: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     borderRadius: 12,
     padding: 15,
     shadowColor: '#000',
@@ -966,7 +1043,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     borderRadius: 15,
     padding: 25,
     width: '80%',
@@ -1087,5 +1164,53 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontFamily: 'Open Sauce',
     marginLeft: 10,
+  },
+  languageButtonContainer: {
+    position: 'relative',
+    zIndex: 1000,
+  },
+  languageDropdown: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    right: 0,
+    backgroundColor: colors.background,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.border,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    marginTop: 5,
+    zIndex: 1001,
+  },
+  languageDropdownOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  languageDropdownOptionSelected: {
+    backgroundColor: '#e8f5e8',
+  },
+  languageDropdownText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.textPrimary,
+    fontFamily: 'Open Sauce',
+  },
+  languageDropdownTextSelected: {
+    color: '#22ae2c',
+    fontWeight: '600',
+  },
+  languageDropdownCheckmark: {
+    marginLeft: 8,
   },
 });

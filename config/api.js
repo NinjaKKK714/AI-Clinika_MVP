@@ -1,6 +1,6 @@
 // Конфигурация API ключей
 export const API_KEYS = {
-  OPENAI_API_KEY: 'YOUR_OPENAI_API_KEY_HERE' // Замените на ваш реальный API ключ
+  OPENAI_API_KEY: process.env.OPENAI_API_KEY || 'YOUR_OPENAI_API_KEY_HERE'
 };
 
 // URL для API

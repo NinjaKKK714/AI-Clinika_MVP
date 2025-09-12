@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Animated, KeyboardAvoidingView, Platform, Linking, Alert, Image, TouchableWithoutFeedback, Keyboard, ScrollView, Modal, BackHandler } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Animated, KeyboardAvoidingView, Platform, Linking, Alert, Image, TouchableWithoutFeedback, Keyboard, ScrollView, Modal, BackHandler, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import { Audio } from 'expo-av';
@@ -9,6 +9,7 @@ import * as FileSystem from 'expo-file-system';
 import LocalIcons from '../components/LocalIcons';
 import { API_KEYS, API_URLS } from '../config/api';
 import StorageService from '../services/storageService';
+import { useTheme } from '../themes/useTheme';
 
 // Импорт экранов
 import ClinicsScreen from './ClinicsScreen';
@@ -20,8 +21,11 @@ import SpecialistDetailScreen from './SpecialistDetailScreen';
 import RequestDetailScreen from './RequestDetailScreen';
 import AnalysisDetailScreen from './AnalysisDetailScreen';
 import HistoryScreen from './HistoryScreen';
+import CheckupDetailScreen from './CheckupDetailScreen';
+import ExpensesScreen from './ExpensesScreen';
 
 export default function HomeScreen({ onLogout }) {
+  const { colors, isDarkMode, toggleTheme } = useTheme();
   const [inputText, setInputText] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
@@ -30,6 +34,7 @@ export default function HomeScreen({ onLogout }) {
   const [specialistDetail, setSpecialistDetail] = useState(null);
   const [requestDetail, setRequestDetail] = useState(null);
   const [analysisDetail, setAnalysisDetail] = useState(null);
+  const [checkupDetail, setCheckupDetail] = useState(null);
   const [attachedPhotos, setAttachedPhotos] = useState([]);
   const [attachedVideos, setAttachedVideos] = useState([]);
   const [showAIRecommendation, setShowAIRecommendation] = useState(false);
@@ -37,6 +42,9 @@ export default function HomeScreen({ onLogout }) {
   const [isLoadingAI, setIsLoadingAI] = useState(false);
   const [speechRecognitionText, setSpeechRecognitionText] = useState('');
   const [profilePhoto, setProfilePhoto] = useState(null);
+  const [showMenuDropdown, setShowMenuDropdown] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState('RU');
+  const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
@@ -288,7 +296,7 @@ export default function HomeScreen({ onLogout }) {
         if (req.status !== 'granted') {
           console.log('Microphone permission denied by user');
           return false;
-        }
+      }
       }
       
       console.log('Microphone permission granted');
@@ -356,7 +364,7 @@ export default function HomeScreen({ onLogout }) {
             
             // Устанавливаем результат
             setInputText(transcribedText);
-            setSpeechRecognitionText('');
+        setSpeechRecognitionText('');
             setIsRecording(false);
             
             console.log('Voice input completed:', transcribedText);
@@ -598,6 +606,27 @@ export default function HomeScreen({ onLogout }) {
     setActiveTab('profile');
   };
 
+  const handleMenuPress = () => {
+    console.log('Menu button pressed, current state:', showMenuDropdown);
+    setShowMenuDropdown(!showMenuDropdown);
+    console.log('Menu dropdown state changed to:', !showMenuDropdown);
+  };
+
+  const handleMenuOptionPress = (option) => {
+    setShowMenuDropdown(false);
+    // Кнопки не ведут никуда - просто закрывают список
+    console.log('Menu option pressed:', option);
+  };
+
+  const handleLanguagePress = () => {
+    setShowLanguageDropdown(!showLanguageDropdown);
+  };
+
+  const handleLanguageSelect = (language) => {
+    setSelectedLanguage(language);
+    setShowLanguageDropdown(false);
+  };
+
   const requestPermissions = async (type = 'media') => {
     if (Platform.OS !== 'web') {
       if (type === 'camera') {
@@ -767,22 +796,22 @@ export default function HomeScreen({ onLogout }) {
     >
       <View style={[
         styles.tabIcon,
-        { backgroundColor: activeTab === tabName ? '#22ae2c' : '#f0f0f0' }
+        { backgroundColor: activeTab === tabName ? colors.secondary : colors.backgroundTertiary }
       ]}>
         {LocalIcons[iconName] ? 
           LocalIcons[iconName]({ 
             size: 24, 
-            color: activeTab === tabName ? "#ffffff" : "#666666" 
+            color: activeTab === tabName ? colors.textInverse : colors.textSecondary 
           }) : 
           <Text style={{ 
-            color: activeTab === tabName ? "#ffffff" : "#666666", 
+            color: activeTab === tabName ? colors.textInverse : colors.textSecondary, 
             fontSize: 16 
           }}>?</Text>
         }
       </View>
       <Text style={[
         styles.tabLabel,
-        { color: activeTab === tabName ? '#22ae2c' : '#666666' }
+        { color: activeTab === tabName ? colors.secondary : colors.textSecondary }
       ]}>
         {label}
       </Text>
@@ -800,9 +829,13 @@ export default function HomeScreen({ onLogout }) {
             } else if (screen === 'SpecialistDetail') {
               setActiveTab('specialistDetail');
               setSpecialistDetail(params.specialist);
+            } else if (screen === 'CheckupDetail') {
+              setActiveTab('checkupDetail');
+              setCheckupDetail(params.checkup);
             }
           }}}
           onBack={() => setActiveTab('home')}
+          onLogout={onLogout}
         />;
       case 'clinicDetail':
         return <ClinicDetailScreen 
@@ -853,6 +886,14 @@ export default function HomeScreen({ onLogout }) {
           navigation={{ goBack: () => setActiveTab('analytics') }}
           onBack={() => setActiveTab('analytics')}
         />;
+      case 'checkupDetail':
+        return <CheckupDetailScreen 
+          route={{ params: { checkup: checkupDetail } }} 
+          navigation={{ goBack: () => setActiveTab('clinics') }}
+          onBack={() => setActiveTab('clinics')}
+        />;
+      case 'expenses':
+        return <ExpensesScreen onBack={() => setActiveTab('home')} />;
       case 'history':
         return <HistoryScreen 
           activeTab={activeHistoryTab} 
@@ -873,7 +914,7 @@ export default function HomeScreen({ onLogout }) {
           >
             {/* Заголовок */}
             <LinearGradient
-              colors={['#0863a7', '#074393']}
+              colors={isDarkMode ? [colors.primary, colors.primaryDark] : ['#0863a7', '#074393']}
               style={styles.header}
             >
               <View style={styles.headerContent}>
@@ -892,27 +933,45 @@ export default function HomeScreen({ onLogout }) {
                   </View>
                 </View>
 
-                {/* Кнопка профиля */}
-                <TouchableOpacity 
-                  style={styles.profileButton}
-                  onPress={handleProfilePress}
-                >
-                  {profilePhoto ? (
-                    <Image 
-                      source={{ uri: profilePhoto }} 
-                      style={styles.profileButtonImage}
-                    />
-                  ) : (
-                    <LinearGradient
-                      colors={['#22ae2c', '#5cc72f']}
-                      style={styles.profileButtonGradient}
+                {/* Кнопки в заголовке */}
+                <View style={styles.headerButtons}>
+                  {/* Кнопка меню */}
+                  <View style={styles.menuButtonContainer}>
+                    <TouchableOpacity 
+                      style={styles.menuButton}
+                      onPress={handleMenuPress}
                     >
-                      {LocalIcons.user({ size: 24, color: "#ffffff" })}
-                    </LinearGradient>
-                  )}
-                </TouchableOpacity>
+                      <View style={styles.menuButtonContent}>
+                        <View style={styles.menuLine} />
+                        <View style={styles.menuLine} />
+                      </View>
+                    </TouchableOpacity>
+                    
+                  </View>
+
+                  {/* Кнопка профиля */}
+                  <TouchableOpacity 
+                    style={styles.profileButton}
+                    onPress={handleProfilePress}
+                  >
+                    {profilePhoto ? (
+                      <Image 
+                        source={{ uri: profilePhoto }} 
+                        style={styles.profileButtonImage}
+                      />
+                    ) : (
+                      <LinearGradient
+                        colors={['#22ae2c', '#5cc72f']}
+                        style={styles.profileButtonGradient}
+                      >
+                        {LocalIcons.user({ size: 24, color: "#ffffff" })}
+                      </LinearGradient>
+                    )}
+                  </TouchableOpacity>
+                </View>
               </View>
             </LinearGradient>
+
 
             {/* Основной контент */}
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -1104,25 +1163,19 @@ export default function HomeScreen({ onLogout }) {
                   <View style={styles.tilesRow}>
                     <TouchableOpacity 
                       style={styles.tile}
-                      onPress={() => {
-                        Alert.alert(
-                          'Первичный прием',
-                          'Функция записи на первичный прием будет доступна в ближайшее время',
-                          [{ text: 'Понятно' }]
-                        );
-                      }}
+                      onPress={() => setActiveTab('expenses')}
                     >
                       <LinearGradient
                         colors={['#E91E63', '#C2185B']}
                         style={styles.tileGradient}
                       >
                         <View style={styles.tileIcon}>
-                          {LocalIcons.calendar ? LocalIcons.calendar({ size: 20, color: "#ffffff" }) : 
-                            LocalIcons.clock ? LocalIcons.clock({ size: 20, color: "#ffffff" }) :
-                            LocalIcons.user ? LocalIcons.user({ size: 20, color: "#ffffff" }) : null
+                          {LocalIcons.wallet ? LocalIcons.wallet({ size: 20, color: "#ffffff" }) : 
+                            LocalIcons.money ? LocalIcons.money({ size: 20, color: "#ffffff" }) :
+                            LocalIcons.creditCard ? LocalIcons.creditCard({ size: 20, color: "#ffffff" }) : null
                           }
                         </View>
-                        <Text style={styles.tileText}>Первичный прием</Text>
+                        <Text style={styles.tileText}>Бюджет</Text>
                       </LinearGradient>
                     </TouchableOpacity>
 
@@ -1229,6 +1282,8 @@ export default function HomeScreen({ onLogout }) {
     }
   };
 
+  const styles = createStyles(colors);
+
   return (
     <View style={styles.container}>
       <KeyboardAvoidingView 
@@ -1242,7 +1297,7 @@ export default function HomeScreen({ onLogout }) {
       {/* Панель управления - фиксированная внизу */}
       <View style={styles.bottomPanel}>
         <LinearGradient
-          colors={['#ffffff', '#f8f9fa']}
+          colors={isDarkMode ? [colors.background, colors.backgroundSecondary] : ['#ffffff', '#f8f9fa']}
           style={styles.bottomPanelGradient}
         >
           {renderTabIcon('home', 'home', 'Главная')}
@@ -1320,8 +1375,7 @@ export default function HomeScreen({ onLogout }) {
             <View style={styles.disclaimerContainer}>
               <LinearGradient colors={['#ff6b35', '#ff8c42']} style={styles.disclaimerGradient}>
                 <Text style={styles.disclaimerText}>
-                  ⚠️ ВАЖНО: Это не медицинский диагноз, а исключительно рекомендация ИИ-системы. 
-                  Для точной диагностики обязательно обратитесь к квалифицированному врачу.
+                  ⚠️ Важно! Это исключительно рекомендация ИИ-системы. Для медицинской диагностики обратитесь к специалисту.
                 </Text>
               </LinearGradient>
             </View>
@@ -1447,14 +1501,95 @@ export default function HomeScreen({ onLogout }) {
           </ScrollView>
         </View>
       </Modal>
+
+      {/* Выпадающий список меню - поверх всех элементов */}
+      {showMenuDropdown && (
+        <View style={styles.menuDropdownOverlay}>
+          <TouchableOpacity 
+            style={styles.menuDropdownOverlayTouchable}
+            onPress={() => setShowMenuDropdown(false)}
+            activeOpacity={1}
+          />
+          <View style={styles.menuDropdown}>
+            {console.log('Rendering dropdown menu')}
+            <TouchableOpacity 
+              style={styles.menuDropdownOption} 
+              onPress={() => handleMenuOptionPress('clinics')}
+            >
+              <Text style={styles.menuDropdownText}>Клиникам</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.menuDropdownOption} 
+              onPress={() => handleMenuOptionPress('doctors')}
+            >
+              <Text style={styles.menuDropdownText}>Врачам</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.menuDropdownOption} 
+              onPress={() => handleMenuOptionPress('specialists')}
+            >
+              <Text style={styles.menuDropdownText}>Специалистам</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
+      {/* Кнопка выбора языка - поверх всех элементов, только на главной странице */}
+      {activeTab === 'home' && (
+        <View style={styles.languageButtonContainer}>
+        <TouchableOpacity 
+          style={styles.languageButton}
+          onPress={handleLanguagePress}
+        >
+          <Text style={styles.languageButtonText}>{selectedLanguage}</Text>
+          <View style={styles.languageButtonArrow}>
+            <Text style={styles.languageButtonArrowText}>{showLanguageDropdown ? '▲' : '▼'}</Text>
+          </View>
+        </TouchableOpacity>
+        
+        {showLanguageDropdown && (
+          <View style={styles.languageDropdown}>
+            <TouchableOpacity 
+              style={[styles.languageDropdownOption, selectedLanguage === 'KZ' && styles.languageDropdownOptionSelected]} 
+              onPress={() => handleLanguageSelect('KZ')}
+            >
+              <Text style={[styles.languageDropdownText, selectedLanguage === 'KZ' && styles.languageDropdownTextSelected]}>
+                KZ
+              </Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={[styles.languageDropdownOption, selectedLanguage === 'RU' && styles.languageDropdownOptionSelected]} 
+              onPress={() => handleLanguageSelect('RU')}
+            >
+              <Text style={[styles.languageDropdownText, selectedLanguage === 'RU' && styles.languageDropdownTextSelected]}>
+                RU
+              </Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={[styles.languageDropdownOption, selectedLanguage === 'ENG' && styles.languageDropdownOptionSelected]} 
+              onPress={() => handleLanguageSelect('ENG')}
+            >
+              <Text style={[styles.languageDropdownText, selectedLanguage === 'ENG' && styles.languageDropdownTextSelected]}>
+                ENG
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        </View>
+      )}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+// Функция для создания стилей с темой
+const createStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.backgroundSecondary,
     marginTop: 0,
     paddingTop: 0,
   },
@@ -1542,6 +1677,7 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 0,
     paddingBottom: 80, // Отступ для нижней панели
+    backgroundColor: colors.background,
   },
   scrollContent: {
     flexGrow: 1,
@@ -1577,7 +1713,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   textInputContainer: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     borderRadius: 20,
     padding: 15,
     shadowColor: '#013e61',
@@ -1617,7 +1753,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontFamily: 'Open Sauce',
-    color: '#333333',
+    color: colors.textPrimary,
     minHeight: 50,
     maxHeight: 120,
     textAlignVertical: 'top',
@@ -1720,8 +1856,8 @@ const styles = StyleSheet.create({
 
   bottomPanel: {
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-    backgroundColor: '#ffffff',
+    borderTopColor: colors.border,
+    backgroundColor: colors.background,
     position: 'absolute',
     bottom: Platform.OS === 'android' ? 0 : 0,
     left: 0,
@@ -1788,7 +1924,7 @@ const styles = StyleSheet.create({
   // Стили для модального окна "Рекомендация ИИ"
   modalContainer: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
   },
   modalHeader: {
     paddingTop: 60,
@@ -1835,7 +1971,7 @@ const styles = StyleSheet.create({
   },
   mainInfo: {
     padding: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
     marginBottom: 10,
@@ -1852,7 +1988,7 @@ const styles = StyleSheet.create({
   dateTimeText: {
     fontSize: 16,
     fontFamily: 'Open Sauce',
-    color: '#333333',
+    color: colors.textPrimary,
     marginLeft: 8,
     fontWeight: '600',
   },
@@ -1872,7 +2008,7 @@ const styles = StyleSheet.create({
   },
   section: {
     padding: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     marginTop: 10,
   },
   sectionHeader: {
@@ -1892,7 +2028,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: 'Open Sauce',
     fontWeight: 'bold',
-    color: '#333333',
+    color: colors.textPrimary,
   },
   sectionContent: {
     paddingLeft: 52,
@@ -1900,7 +2036,7 @@ const styles = StyleSheet.create({
   userQuery: {
     fontSize: 16,
     fontFamily: 'Open Sauce',
-    color: '#333333',
+    color: colors.textPrimary,
     lineHeight: 24,
   },
   aiResponse: {
@@ -1927,7 +2063,7 @@ const styles = StyleSheet.create({
   symptomText: {
     fontSize: 16,
     fontFamily: 'Open Sauce',
-    color: '#333333',
+    color: colors.textPrimary,
     flex: 1,
   },
   recommendationItem: {
@@ -1936,7 +2072,7 @@ const styles = StyleSheet.create({
   recommendationText: {
     fontSize: 16,
     fontFamily: 'Open Sauce',
-    color: '#333333',
+    color: colors.textPrimary,
     lineHeight: 24,
   },
   statusContainer: {
@@ -1977,14 +2113,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: 'Open Sauce',
     fontWeight: 'bold',
-    color: '#333333',
+    color: colors.textPrimary,
     marginBottom: 10,
     textAlign: 'center',
   },
   loadingSubtext: {
     fontSize: 14,
     fontFamily: 'Open Sauce',
-    color: '#666666',
+    color: colors.textSecondary,
     textAlign: 'center',
   },
 
@@ -2028,5 +2164,121 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
     lineHeight: 14,
+  },
+
+  // Стили для кнопок в заголовке
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  menuButtonContainer: {
+    position: 'relative',
+    zIndex: 9999,
+  },
+  menuButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  menuButtonContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 4,
+  },
+  menuLine: {
+    width: 20,
+    height: 2,
+    backgroundColor: '#ffffff',
+    borderRadius: 1,
+  },
+  menuDropdownOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 99999,
+  },
+  menuDropdownOverlayTouchable: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
+  menuDropdown: {
+    position: 'absolute',
+    top: 120,
+    right: 20,
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 15,
+    minWidth: 150,
+  },
+  menuDropdownOption: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  menuDropdownText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#333333',
+    fontFamily: 'Open Sauce',
+  },
+  languageButtonContainer: {
+    position: 'absolute',
+    top: 160,
+    left: Dimensions.get('window').width - 45,
+    zIndex: 9999,
+  },
+  languageButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.background,
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  languageButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.textPrimary,
+    fontFamily: 'Open Sauce',
+    marginRight: 8,
+  },
+  languageButtonArrow: {
+    marginLeft: 4,
+  },
+  languageButtonArrowText: {
+    fontSize: 10,
+    color: colors.textSecondary,
+  },
+  languageDropdownOptionSelected: {
+    backgroundColor: '#e8f5e8',
+  },
+  languageDropdownTextSelected: {
+    color: '#22ae2c',
+    fontWeight: '600',
   },
 });

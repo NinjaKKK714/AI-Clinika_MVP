@@ -8,3 +8,6 @@ export const Marker = () => React.createElement('div');
 export const PROVIDER_GOOGLE = 'google';
 
 export default MapView;
+
+
+

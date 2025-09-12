@@ -302,3 +302,5 @@ psql -h localhost -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE ai_clinika TO
 ---
 
 **Готово!** Ваша админ-панель готова к работе с PostgreSQL! 🎉
+
+

@@ -17,8 +17,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import LocalIcons from '../components/LocalIcons';
+import { useTheme } from '../themes/useTheme';
 
 export default function AnalysesScreen({ navigation, onBack }) {
+  const { colors, isDarkMode } = useTheme();
+  const styles = createStyles(colors);
   const [analyses, setAnalyses] = useState([
     {
       id: 1,
@@ -103,6 +106,7 @@ export default function AnalysesScreen({ navigation, onBack }) {
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
+
 
   // Статистика анализов
   const totalAnalyses = analyses.length;
@@ -330,7 +334,7 @@ export default function AnalysesScreen({ navigation, onBack }) {
     </TouchableOpacity>
   );
 
-  return (
+return (
     <TouchableWithoutFeedback onPress={() => setShowSortMenu(false)}>
       <View style={styles.container}>
         <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
@@ -570,10 +574,10 @@ export default function AnalysesScreen({ navigation, onBack }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.backgroundSecondary,
   },
   content: {
     flex: 1,
@@ -607,7 +611,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     paddingHorizontal: 20,
     paddingVertical: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
@@ -627,13 +631,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: 'Open Sauce',
     fontWeight: 'bold',
-    color: '#333333',
+    color: colors.textPrimary,
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
     fontFamily: 'Open Sauce',
-    color: '#666666',
+    color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 16,
   },
@@ -646,7 +650,7 @@ const styles = StyleSheet.create({
     paddingBottom: 120, // Отступ для нижней панели навигации
   },
   analysisCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     borderRadius: 15,
     marginBottom: 20,
     padding: 20,
@@ -672,13 +676,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Open Sauce',
     fontWeight: 'bold',
-    color: '#333333',
+    color: colors.textPrimary,
     marginBottom: 5,
   },
   clinicName: {
     fontSize: 14,
     fontFamily: 'Open Sauce',
-    color: '#666666',
+    color: colors.textSecondary,
   },
   deleteButton: {
     padding: 5,
@@ -705,31 +709,31 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Open Sauce',
     fontWeight: '600',
-    color: '#333333',
+    color: colors.textPrimary,
     marginBottom: 5,
   },
   fileType: {
     fontSize: 14,
     fontFamily: 'Open Sauce',
-    color: '#666666',
+    color: colors.textSecondary,
   },
   commentContainer: {
     marginBottom: 15,
     padding: 15,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.backgroundSecondary,
     borderRadius: 10,
   },
   commentLabel: {
     fontSize: 14,
     fontFamily: 'Open Sauce',
     fontWeight: '600',
-    color: '#333333',
+    color: colors.textPrimary,
     marginBottom: 5,
   },
   commentText: {
     fontSize: 14,
     fontFamily: 'Open Sauce',
-    color: '#666666',
+    color: colors.textSecondary,
     lineHeight: 20,
   },
   analysisFooter: {
@@ -752,7 +756,7 @@ const styles = StyleSheet.create({
   viewButtonText: {
     fontSize: 14,
     fontFamily: 'Open Sauce',
-    color: '#0863a7',
+    color: colors.primary,
     fontWeight: '600',
     marginRight: 5,
   },
@@ -775,19 +779,19 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: 'Open Sauce',
     fontWeight: 'bold',
-    color: '#333333',
+    color: colors.textPrimary,
     marginBottom: 10,
   },
   emptyText: {
     fontSize: 14,
     fontFamily: 'Open Sauce',
-    color: '#666666',
+    color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 20,
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
   },
   modalHeader: {
     paddingTop: 60,
@@ -824,7 +828,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Open Sauce',
     fontWeight: 'bold',
-    color: '#333333',
+    color: colors.textPrimary,
     marginBottom: 15,
   },
   fileButtons: {
@@ -853,10 +857,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 15,
     padding: 15,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.backgroundSecondary,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: colors.border,
   },
   selectedFileIcon: {
     marginRight: 10,
@@ -864,28 +868,28 @@ const styles = StyleSheet.create({
   selectedFileName: {
     fontSize: 14,
     fontFamily: 'Open Sauce',
-    color: '#333333',
+    color: colors.textPrimary,
     flex: 1,
   },
   dateInput: {
     fontSize: 16,
     fontFamily: 'Open Sauce',
-    color: '#333333',
+    color: colors.textPrimary,
     padding: 15,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.backgroundSecondary,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: colors.border,
   },
   textInput: {
     fontSize: 16,
     fontFamily: 'Open Sauce',
-    color: '#333333',
+    color: colors.textPrimary,
     padding: 15,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.backgroundSecondary,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: colors.border,
   },
   commentInput: {
     minHeight: 100,
@@ -934,7 +938,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 120,
     right: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     borderRadius: 8,
     shadowColor: '#000',
     shadowOffset: {
@@ -959,16 +963,16 @@ const styles = StyleSheet.create({
   sortMenuItemText: {
     fontSize: 14,
     fontFamily: 'Open Sauce',
-    color: '#333333',
+    color: colors.textPrimary,
     fontWeight: '500',
   },
   sortMenuItemTextActive: {
-    color: '#0863a7',
+    color: colors.primary,
     fontWeight: '600',
   },
   sortMenuItemCheck: {
     fontSize: 16,
-    color: '#0863a7',
+    color: colors.primary,
     fontWeight: 'bold',
   },
 });

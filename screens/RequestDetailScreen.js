@@ -10,8 +10,11 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import LocalIcons from '../components/LocalIcons';
+import { useTheme } from '../themes/useTheme';
 
 export default function RequestDetailScreen({ route, navigation, onBack }) {
+  const { colors, isDarkMode } = useTheme();
+  const styles = createStyles(colors);
   const { request } = route.params;
   console.log('RequestDetailScreen received request:', request);
   
@@ -101,6 +104,15 @@ export default function RequestDetailScreen({ route, navigation, onBack }) {
             </View>
           </View>
 
+          {/* Дисклеймер */}
+          <View style={styles.disclaimerContainer}>
+            <LinearGradient colors={['#ff6b35', '#ff8c42']} style={styles.disclaimerGradient}>
+              <Text style={styles.disclaimerText}>
+                ⚠️ Важно! Это исключительно рекомендация ИИ-системы. Для медицинской диагностики обратитесь к специалисту.
+              </Text>
+            </LinearGradient>
+          </View>
+
           {/* Запрос пользователя */}
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
@@ -188,10 +200,10 @@ export default function RequestDetailScreen({ route, navigation, onBack }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.backgroundSecondary,
   },
   content: {
     flex: 1,
@@ -228,7 +240,7 @@ const styles = StyleSheet.create({
   },
   mainInfo: {
     padding: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
@@ -244,7 +256,7 @@ const styles = StyleSheet.create({
   dateTimeText: {
     fontSize: 16,
     fontFamily: 'Open Sauce',
-    color: '#333333',
+    color: colors.textPrimary,
     marginLeft: 8,
     fontWeight: '600',
   },
@@ -264,7 +276,7 @@ const styles = StyleSheet.create({
   },
   section: {
     padding: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     marginTop: 10,
   },
   sectionHeader: {
@@ -284,7 +296,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: 'Open Sauce',
     fontWeight: 'bold',
-    color: '#333333',
+    color: colors.textPrimary,
   },
   sectionContent: {
     paddingLeft: 52,
@@ -292,13 +304,13 @@ const styles = StyleSheet.create({
   userQuery: {
     fontSize: 16,
     fontFamily: 'Open Sauce',
-    color: '#333333',
+    color: colors.textPrimary,
     lineHeight: 24,
   },
   aiResponse: {
     fontSize: 16,
     fontFamily: 'Open Sauce',
-    color: '#0863a7',
+    color: colors.primary,
     lineHeight: 24,
   },
   symptomItem: {
@@ -319,7 +331,7 @@ const styles = StyleSheet.create({
   symptomText: {
     fontSize: 16,
     fontFamily: 'Open Sauce',
-    color: '#333333',
+    color: colors.textPrimary,
     flex: 1,
   },
   recommendationItem: {
@@ -328,7 +340,7 @@ const styles = StyleSheet.create({
   recommendationText: {
     fontSize: 16,
     fontFamily: 'Open Sauce',
-    color: '#333333',
+    color: colors.textPrimary,
     lineHeight: 24,
   },
   statusContainer: {
@@ -347,6 +359,24 @@ const styles = StyleSheet.create({
     fontFamily: 'Open Sauce',
     color: '#22ae2c',
     fontWeight: '600',
+  },
+  disclaimerContainer: {
+    margin: 20,
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  disclaimerGradient: {
+    padding: 15,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  disclaimerText: {
+    fontSize: 14,
+    fontFamily: 'Open Sauce',
+    color: '#ffffff',
+    textAlign: 'center',
+    fontWeight: '600',
+    lineHeight: 20,
   },
 });
 

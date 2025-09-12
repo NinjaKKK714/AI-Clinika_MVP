@@ -1,9 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Dimensions, Image } from 'react-native';
+import { useTheme } from '../themes/useTheme';
 
 const { width } = Dimensions.get('window');
 
 export default function SplashScreen({ onFinish }) {
+  const { colors, isDarkMode } = useTheme();
+  const styles = createStyles(colors);
   const progressAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
@@ -41,7 +44,7 @@ export default function SplashScreen({ onFinish }) {
     outputRange: ['0%', '100%'],
   });
 
-  return (
+return (
     <View style={styles.container}>
       <Animated.View
         style={[
@@ -64,7 +67,7 @@ export default function SplashScreen({ onFinish }) {
 
         {/* Название компании */}
         <Text style={styles.title}>AI-CLINIKA</Text>
-        <Text style={styles.subtitle}>Инновационные решения в заботе о вашем здоровье</Text>
+        <Text style={styles.subtitle}>Цифровая медицина рядом</Text>
 
         {/* Прогресс-бар */}
         <View style={styles.progressContainer}>
@@ -90,10 +93,10 @@ export default function SplashScreen({ onFinish }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -114,14 +117,14 @@ const styles = StyleSheet.create({
     fontSize: 36,
     fontFamily: 'Open Sauce',
     fontWeight: 'bold',
-    color: '#0863a7',
+    color: colors.primary,
     marginBottom: 10,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
     fontFamily: 'Open Sauce',
-    color: '#666666',
+    color: colors.textSecondary,
     textAlign: 'center',
     opacity: 0.9,
     lineHeight: 24,
@@ -146,7 +149,7 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: 14,
-    color: '#666666',
+    color: colors.textSecondary,
     textAlign: 'center',
     opacity: 0.8,
   },

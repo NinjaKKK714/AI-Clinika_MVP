@@ -9,22 +9,27 @@ import {
   Image,
   Dimensions,
   TextInput,
-  BackHandler
+  BackHandler,
+  Alert
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import LocalIcons from '../components/LocalIcons';
+import { useTheme } from '../themes/useTheme';
 
 const { width } = Dimensions.get('window');
 
 export default function ClinicsScreen({ navigation, onBack }) {
+  const { colors, isDarkMode } = useTheme();
+  const styles = createStyles(colors);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [favorites, setFavorites] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
-  const [activeTab, setActiveTab] = useState('clinics'); // 'clinics' или 'specialists'
+  const [activeTab, setActiveTab] = useState('clinics'); // 'clinics', 'specialists' или 'checkup'
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
+
 
   useEffect(() => {
     Animated.parallel([
@@ -389,6 +394,111 @@ export default function ClinicsScreen({ navigation, onBack }) {
     }
   ];
 
+  const checkupCenters = [
+    {
+      id: 1,
+      name: 'Медицинский центр "Здоровье+"',
+      type: 'Комплексный чек-ап',
+      location: 'ул. Абая 150, Алматы',
+      distance: '15 мин • 1.5 км',
+      rating: 4.8,
+      reviews: '1.2k+',
+      image: require('../Clinic_Photo/Clinic1.jpg'),
+      price: 'от 45 000 ₸',
+      duration: '2-3 часа',
+      description: 'Полное медицинское обследование организма. Включает анализы крови, УЗИ, ЭКГ, консультации специалистов.',
+      services: ['Анализы крови', 'УЗИ органов', 'ЭКГ', 'Консультация терапевта', 'Флюорография'],
+      phone: '+7 (727) 123-45-67',
+      workingHours: 'Пн-Пт: 8:00-18:00, Сб: 9:00-15:00',
+      coordinates: { latitude: 43.238949, longitude: 76.889709 }
+    },
+    {
+      id: 2,
+      name: 'Клиника "Премиум Диагностика"',
+      type: 'Расширенный чек-ап',
+      location: 'пр. Абая 90, Алматы',
+      distance: '20 мин • 2.1 км',
+      rating: 4.9,
+      reviews: '850+',
+      image: require('../Clinic_Photo/Clinic2.jpg'),
+      price: 'от 75 000 ₸',
+      duration: '3-4 часа',
+      description: 'Расширенное обследование с МРТ и КТ. Включает онкоскрининг и кардиологическое обследование.',
+      services: ['МРТ', 'КТ', 'Онкоскрининг', 'Кардиологическое обследование', 'Анализы на гормоны'],
+      phone: '+7 (727) 234-56-78',
+      workingHours: 'Пн-Пт: 7:00-20:00, Сб-Вс: 8:00-16:00',
+      coordinates: { latitude: 43.238949, longitude: 76.889709 }
+    },
+    {
+      id: 3,
+      name: 'Медцентр "Семейный"',
+      type: 'Базовый чек-ап',
+      location: 'ул. Сатпаева 50, Алматы',
+      distance: '25 мин • 3.2 км',
+      rating: 4.6,
+      reviews: '650+',
+      image: require('../Clinic_Photo/Clinic3.jpg'),
+      price: 'от 25 000 ₸',
+      duration: '1.5-2 часа',
+      description: 'Базовое медицинское обследование для всей семьи. Включает основные анализы и консультации.',
+      services: ['Общий анализ крови', 'Биохимия', 'УЗИ брюшной полости', 'Консультация терапевта'],
+      phone: '+7 (727) 345-67-89',
+      workingHours: 'Пн-Пт: 8:00-17:00, Сб: 9:00-14:00',
+      coordinates: { latitude: 43.238949, longitude: 76.889709 }
+    },
+    {
+      id: 4,
+      name: 'Диагностический центр "Эксперт"',
+      type: 'Специализированный чек-ап',
+      location: 'ул. Фурманова 120, Алматы',
+      distance: '18 мин • 2.8 км',
+      rating: 4.7,
+      reviews: '920+',
+      image: require('../Clinic_Photo/Clinic5.jpg'),
+      price: 'от 60 000 ₸',
+      duration: '2.5-3 часа',
+      description: 'Специализированное обследование с акцентом на кардиологию и эндокринологию.',
+      services: ['Эхокардиография', 'Анализы на гормоны', 'УЗИ щитовидной железы', 'Консультация эндокринолога'],
+      phone: '+7 (727) 456-78-90',
+      workingHours: 'Пн-Пт: 8:00-19:00, Сб: 9:00-15:00',
+      coordinates: { latitude: 43.238949, longitude: 76.889709 }
+    },
+    {
+      id: 5,
+      name: 'Клиника "Здоровое сердце"',
+      type: 'Кардиологический чек-ап',
+      location: 'пр. Республики 45, Алматы',
+      distance: '22 мин • 3.5 км',
+      rating: 4.8,
+      reviews: '780+',
+      image: require('../Clinic_Photo/Clinic6.jpg'),
+      price: 'от 35 000 ₸',
+      duration: '2 часа',
+      description: 'Специализированное кардиологическое обследование для выявления заболеваний сердца.',
+      services: ['ЭКГ', 'Эхокардиография', 'Холтер-мониторинг', 'Консультация кардиолога', 'Анализы на холестерин'],
+      phone: '+7 (727) 567-89-01',
+      workingHours: 'Пн-Пт: 8:00-18:00, Сб: 9:00-16:00',
+      coordinates: { latitude: 43.238949, longitude: 76.889709 }
+    },
+    {
+      id: 6,
+      name: 'Медцентр "Женское здоровье"',
+      type: 'Женский чек-ап',
+      location: 'ул. Гоголя 80, Алматы',
+      distance: '16 мин • 2.3 км',
+      rating: 4.9,
+      reviews: '1.1k+',
+      image: require('../Clinic_Photo/Clinic7.jpg'),
+      price: 'от 40 000 ₸',
+      duration: '2-2.5 часа',
+      description: 'Комплексное обследование женского здоровья с акцентом на гинекологию и маммологию.',
+      services: ['Гинекологический осмотр', 'УЗИ органов малого таза', 'Маммография', 'Анализы на гормоны', 'Консультация гинеколога'],
+      phone: '+7 (727) 678-90-12',
+      workingHours: 'Пн-Пт: 8:00-19:00, Сб: 9:00-15:00',
+      coordinates: { latitude: 43.238949, longitude: 76.889709 }
+    }
+  ];
+
   const filteredClinics = clinics
     .filter(clinic => selectedCategory === 'all' || clinic.category === selectedCategory)
     .filter(clinic => 
@@ -405,6 +515,15 @@ export default function ClinicsScreen({ navigation, onBack }) {
       specialist.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       specialist.specialization.toLowerCase().includes(searchQuery.toLowerCase()) ||
       specialist.location.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+  const filteredCheckups = checkupCenters
+    .filter(checkup => selectedCategory === 'all' || checkup.type.toLowerCase().includes(selectedCategory))
+    .filter(checkup => 
+      searchQuery === '' || 
+      checkup.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      checkup.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      checkup.location.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
   const toggleFavorite = (clinicId) => {
@@ -570,11 +689,94 @@ export default function ClinicsScreen({ navigation, onBack }) {
     );
   };
 
+  const renderCheckupCard = (checkup) => {
+    if (!checkup) {
+      console.error('Checkup data is null or undefined');
+      return null;
+    }
+    
+    return (
+      <TouchableOpacity 
+        key={checkup.id} 
+        style={styles.clinicCard}
+        onPress={() => {
+          try {
+            if (navigation && navigation.navigate && checkup) {
+              navigation.navigate('CheckupDetail', { checkup });
+            } else {
+              console.error('Navigation or checkup data not available');
+            }
+          } catch (error) {
+            console.error('Error navigating to checkup detail:', error);
+          }
+        }}
+      >
+      <View style={styles.clinicImageContainer}>
+        <Image
+          source={checkup.image || require('../ai.png')}
+          style={styles.clinicImage}
+          resizeMode="cover"
+          onError={(error) => {
+            console.log('Image load error:', error);
+          }}
+        />
+        
+        {/* Рейтинг */}
+        <View style={styles.ratingOverlay}>
+          <LinearGradient colors={['#FFD700', '#FFA500']} style={styles.ratingGradient}>
+            <View style={styles.ratingContent}>
+              {LocalIcons.star({ size: 12, color: "#ffffff" })}
+              <Text style={styles.ratingText}>{checkup.rating}</Text>
+              <Text style={styles.reviewsText}>({checkup.reviews})</Text>
+            </View>
+          </LinearGradient>
+        </View>
+
+        {/* Кнопка избранного */}
+        <TouchableOpacity 
+          style={styles.favoriteButton}
+          onPress={() => toggleFavorite(checkup.id)}
+        >
+          <LinearGradient 
+            colors={favorites[checkup.id] ? ['#ff4444', '#d32f2f'] : ['#ffffff', '#f8f9fa']} 
+            style={styles.favoriteGradient}
+          >
+            {favorites[checkup.id] ? 
+              LocalIcons.heart({ size: 16, color: "#ffffff" }) : 
+              LocalIcons.heart({ size: 16, color: "#0863a7" })
+            }
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.clinicInfo}>
+        <Text style={styles.clinicName}>{checkup.name}</Text>
+        <Text style={styles.clinicServices}>{checkup.type}</Text>
+        
+        <View style={styles.priceContainer}>
+          <Text style={styles.priceText}>{checkup.price}</Text>
+          <Text style={styles.durationText}>• {checkup.duration}</Text>
+        </View>
+        
+        <View style={styles.locationContainer}>
+          {LocalIcons.location({ size: 16, color: "#0863a7" })}
+          <Text style={styles.locationText}>{checkup.location}</Text>
+        </View>
+        
+        <View style={styles.distanceContainer}>
+          {LocalIcons.time({ size: 16, color: "#0863a7" })}
+          <Text style={styles.distanceText}>{checkup.distance}</Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
         {/* Заголовок */}
-        <LinearGradient colors={['#0863a7', '#074393']} style={styles.header}>
+        <LinearGradient colors={isDarkMode ? [colors.primary, colors.primaryDark] : ['#0863a7', '#074393']} style={styles.header}>
           <View style={styles.headerContent}>
             <TouchableOpacity onPress={onBack} style={styles.backButton}>
               {LocalIcons.arrowBack({ size: 24, color: '#ffffff' })}
@@ -582,18 +784,20 @@ export default function ClinicsScreen({ navigation, onBack }) {
             
             <Text style={styles.headerTitle}>Медицинские услуги</Text>
             
-            <TouchableOpacity 
-              style={styles.searchButton}
-              onPress={() => setShowSearch(!showSearch)}
-            >
-              {LocalIcons.search({ size: 24, color: "#ffffff" })}
-            </TouchableOpacity>
+            <View style={styles.headerButtons}>
+              <TouchableOpacity 
+                style={styles.searchButton}
+                onPress={() => setShowSearch(!showSearch)}
+              >
+                {LocalIcons.search({ size: 24, color: "#ffffff" })}
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Подвкладки */}
           <View style={styles.tabContainer}>
             <TouchableOpacity 
-              style={[styles.tabButton, activeTab === 'clinics' && styles.tabButtonActive]}
+              style={[styles.tabButton, styles.tabButtonWide, activeTab === 'clinics' && styles.tabButtonActive]}
               onPress={() => setActiveTab('clinics')}
             >
               <Text style={[styles.tabButtonText, activeTab === 'clinics' && styles.tabButtonTextActive]}>
@@ -602,11 +806,20 @@ export default function ClinicsScreen({ navigation, onBack }) {
             </TouchableOpacity>
             
             <TouchableOpacity 
-              style={[styles.tabButton, activeTab === 'specialists' && styles.tabButtonActive]}
+              style={[styles.tabButton, styles.tabButtonWide, activeTab === 'specialists' && styles.tabButtonActive]}
               onPress={() => setActiveTab('specialists')}
             >
               <Text style={[styles.tabButtonText, activeTab === 'specialists' && styles.tabButtonTextActive]}>
                 Специалисты
+              </Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={[styles.tabButton, activeTab === 'checkup' && styles.tabButtonActive]}
+              onPress={() => setActiveTab('checkup')}
+            >
+              <Text style={[styles.tabButtonText, activeTab === 'checkup' && styles.tabButtonTextActive]}>
+                Чек-ап
               </Text>
             </TouchableOpacity>
           </View>
@@ -619,7 +832,11 @@ export default function ClinicsScreen({ navigation, onBack }) {
               {LocalIcons.search({ size: 20, color: "#0863a7" })}
               <TextInput
                 style={styles.searchInput}
-                placeholder={activeTab === 'clinics' ? "Поиск клиник..." : "Поиск специалистов..."}
+                placeholder={
+                  activeTab === 'clinics' ? "Поиск клиник..." : 
+                  activeTab === 'specialists' ? "Поиск специалистов..." : 
+                  "Поиск чек-апов..."
+                }
                 placeholderTextColor="#9ad0e7"
                 value={searchQuery}
                 onChangeText={setSearchQuery}
@@ -670,12 +887,20 @@ export default function ClinicsScreen({ navigation, onBack }) {
                 <Text style={styles.emptyStateText}>Клиники не найдены</Text>
               </View>
             )
-          ) : (
+          ) : activeTab === 'specialists' ? (
             filteredSpecialists.length > 0 ? (
               filteredSpecialists.map(renderSpecialistCard)
             ) : (
               <View style={styles.emptyState}>
                 <Text style={styles.emptyStateText}>Специалисты не найдены</Text>
+              </View>
+            )
+          ) : (
+            filteredCheckups.length > 0 ? (
+              filteredCheckups.map(renderCheckupCard)
+            ) : (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyStateText}>Чек-апы не найдены</Text>
               </View>
             )
           )}
@@ -685,10 +910,10 @@ export default function ClinicsScreen({ navigation, onBack }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.backgroundSecondary,
   },
   content: {
     flex: 1,
@@ -731,10 +956,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tabButtonActive: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
   },
   tabButtonText: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: 'Open Sauce',
     fontWeight: '600',
     color: '#ffffff',
@@ -742,13 +967,21 @@ const styles = StyleSheet.create({
   tabButtonTextActive: {
     color: '#0863a7',
   },
+  tabButtonWide: {
+    flex: 1.7,
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
   searchButton: {
     padding: 5,
   },
   searchContainer: {
     paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
@@ -766,33 +999,33 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontFamily: 'Open Sauce',
-    color: '#333333',
+    color: colors.textPrimary,
     marginLeft: 10,
   },
   filtersContainer: {
     paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: colors.border,
   },
   filterButton: {
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 20,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.background,
     marginRight: 10,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: colors.border,
   },
   filterButtonActive: {
-    backgroundColor: '#0863a7',
-    borderColor: '#0863a7',
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   filterButtonText: {
     fontSize: 14,
     fontFamily: 'Open Sauce',
-    color: '#333333',
+    color: colors.textPrimary,
     fontWeight: '500',
   },
   filterButtonTextActive: {
@@ -808,7 +1041,7 @@ const styles = StyleSheet.create({
     paddingBottom: 120, // Отступ для нижней панели навигации
   },
   clinicCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     borderRadius: 15,
     marginBottom: 20,
     shadowColor: '#013e61',
@@ -880,13 +1113,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: 'Open Sauce',
     fontWeight: 'bold',
-    color: '#333333',
+    color: colors.textPrimary,
     marginBottom: 5,
   },
   clinicServices: {
     fontSize: 14,
     fontFamily: 'Open Sauce',
-    color: '#666666',
+    color: colors.textSecondary,
     marginBottom: 10,
   },
   locationContainer: {
@@ -897,7 +1130,7 @@ const styles = StyleSheet.create({
   locationText: {
     fontSize: 14,
     fontFamily: 'Open Sauce',
-    color: '#333333',
+    color: colors.textPrimary,
     marginLeft: 8,
   },
   distanceContainer: {
@@ -907,7 +1140,24 @@ const styles = StyleSheet.create({
   distanceText: {
     fontSize: 14,
     fontFamily: 'Open Sauce',
-    color: '#333333',
+    color: colors.textPrimary,
     marginLeft: 8,
+  },
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  priceText: {
+    fontSize: 16,
+    fontFamily: 'Open Sauce',
+    fontWeight: 'bold',
+    color: '#22ae2c',
+    marginRight: 8,
+  },
+  durationText: {
+    fontSize: 14,
+    fontFamily: 'Open Sauce',
+    color: colors.textSecondary,
   },
 });

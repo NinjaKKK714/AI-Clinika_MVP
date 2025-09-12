@@ -243,3 +243,6 @@ SELECT
         ELSE NULL
     END
 FROM user_clinic_data ucd;
+
+
+

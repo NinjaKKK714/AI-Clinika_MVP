@@ -15,11 +15,14 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import MapView, { Marker } from 'react-native-maps';
+import { useTheme } from '../themes/useTheme';
 import LocalIcons from '../components/LocalIcons';
 
 const { width, height } = Dimensions.get('window');
 
 export default function ClinicDetailScreen({ route, navigation, onBack }) {
+  const { colors, isDarkMode } = useTheme();
+  const styles = createStyles(colors);
   const { clinic } = route.params;
   const [isFavorite, setIsFavorite] = useState(false);
   
@@ -108,7 +111,7 @@ export default function ClinicDetailScreen({ route, navigation, onBack }) {
     </TouchableOpacity>
   );
 
-  return (
+return (
     <View style={styles.container}>
       <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
         {/* Заголовок */}
@@ -288,10 +291,10 @@ export default function ClinicDetailScreen({ route, navigation, onBack }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.backgroundSecondary,
   },
   content: {
     flex: 1,
@@ -364,7 +367,7 @@ const styles = StyleSheet.create({
   },
   mainInfo: {
     padding: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
@@ -372,37 +375,37 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: 'Open Sauce',
     fontWeight: 'bold',
-    color: '#333333',
+    color: colors.textPrimary,
     marginBottom: 5,
   },
   clinicServices: {
     fontSize: 16,
     fontFamily: 'Open Sauce',
-    color: '#666666',
+    color: colors.textSecondary,
     marginBottom: 5,
   },
   clinicDistance: {
     fontSize: 14,
     fontFamily: 'Open Sauce',
-    color: '#0863a7',
+    color: colors.primary,
     fontWeight: '500',
   },
   section: {
     padding: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     marginTop: 10,
   },
   sectionTitle: {
     fontSize: 18,
     fontFamily: 'Open Sauce',
     fontWeight: 'bold',
-    color: '#333333',
+    color: colors.textPrimary,
     marginBottom: 15,
   },
   description: {
     fontSize: 16,
     fontFamily: 'Open Sauce',
-    color: '#666666',
+    color: colors.textSecondary,
     lineHeight: 24,
   },
   infoContainer: {
@@ -431,14 +434,14 @@ const styles = StyleSheet.create({
   infoTitle: {
     fontSize: 14,
     fontFamily: 'Open Sauce',
-    color: '#666666',
+    color: colors.textSecondary,
     marginBottom: 2,
   },
   infoValue: {
     fontSize: 16,
     fontFamily: 'Open Sauce',
     fontWeight: '600',
-    color: '#333333',
+    color: colors.textPrimary,
   },
   actionButton: {
     padding: 5,
@@ -463,7 +466,7 @@ const styles = StyleSheet.create({
   mapPlaceholderText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#666666',
+    color: colors.textSecondary,
     marginBottom: 5,
   },
   mapPlaceholderSubtext: {
@@ -495,14 +498,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Open Sauce',
     fontWeight: '700',
-    color: '#333333',
+    color: colors.textPrimary,
     marginBottom: 5,
     textAlign: 'center',
   },
   mapInfoAddress: {
     fontSize: 14,
     fontFamily: 'Open Sauce',
-    color: '#666666',
+    color: colors.textSecondary,
     marginBottom: 15,
     textAlign: 'center',
     lineHeight: 20,
@@ -534,7 +537,7 @@ const styles = StyleSheet.create({
     height: 250,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.backgroundSecondary,
     borderRadius: 15,
   },
   mapContent: {
@@ -544,18 +547,18 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: 'Open Sauce',
     fontWeight: 'bold',
-    color: '#333333',
+    color: colors.textPrimary,
     marginTop: 10,
   },
   mapSubtext: {
     fontSize: 14,
     fontFamily: 'Open Sauce',
-    color: '#666666',
+    color: colors.textSecondary,
     marginTop: 5,
   },
   bookingSection: {
     padding: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     marginTop: 10,
     marginBottom: 20,
   },

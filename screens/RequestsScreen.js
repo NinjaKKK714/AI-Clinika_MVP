@@ -14,11 +14,14 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import LocalIcons from '../components/LocalIcons';
+import { useTheme } from '../themes/useTheme';
 import StorageService from '../services/storageService';
 
 const { width } = Dimensions.get('window');
 
 export default function RequestsScreen({ navigation, onBack }) {
+  const { colors, isDarkMode } = useTheme();
+  const styles = createStyles(colors);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDateFilter, setSelectedDateFilter] = useState('all');
   const [showSearch, setShowSearch] = useState(false);
@@ -29,6 +32,7 @@ export default function RequestsScreen({ navigation, onBack }) {
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
+
 
   useEffect(() => {
     loadRequests();
@@ -224,7 +228,7 @@ export default function RequestsScreen({ navigation, onBack }) {
     </View>
   );
 
-  return (
+return (
     <TouchableWithoutFeedback onPress={() => setShowSortMenu(false)}>
       <View style={styles.container}>
         {/* Заголовок */}
@@ -402,10 +406,10 @@ export default function RequestsScreen({ navigation, onBack }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.backgroundSecondary,
   },
   scrollContainer: {
     flex: 1,
@@ -448,31 +452,31 @@ const styles = StyleSheet.create({
   searchContainer: {
     paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
   searchInputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.backgroundSecondary,
     borderRadius: 15,
     paddingHorizontal: 15,
     paddingVertical: 12,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: colors.border,
   },
   searchInput: {
     flex: 1,
     fontSize: 16,
     fontFamily: 'Open Sauce',
-    color: '#333333',
+    color: colors.textPrimary,
     marginLeft: 10,
   },
   filtersContainer: {
     paddingHorizontal: 20,
     paddingVertical: 10,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
@@ -480,10 +484,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 20,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.backgroundSecondary,
     marginRight: 10,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: colors.border,
   },
   filterButtonActive: {
     backgroundColor: '#0863a7',
@@ -492,7 +496,7 @@ const styles = StyleSheet.create({
   filterButtonText: {
     fontSize: 14,
     fontFamily: 'Open Sauce',
-    color: '#333333',
+    color: colors.textPrimary,
     fontWeight: '500',
   },
   filterButtonTextActive: {
@@ -502,7 +506,7 @@ const styles = StyleSheet.create({
   requestsListHeader: {
     paddingHorizontal: 20,
     paddingVertical: 10,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     borderBottomWidth: 1,
     borderBottomColor: '#e9ecef',
   },
@@ -510,7 +514,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Open Sauce',
     fontWeight: '600',
-    color: '#333333',
+    color: colors.textPrimary,
     textAlign: 'center',
   },
   requestsList: {
@@ -518,7 +522,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   requestCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     borderRadius: 15,
     marginBottom: 20,
     padding: 20,
@@ -543,7 +547,7 @@ const styles = StyleSheet.create({
   requestDate: {
     fontSize: 14,
     fontFamily: 'Open Sauce',
-    color: '#666666',
+    color: colors.textSecondary,
     marginBottom: 5,
   },
   categoryContainer: {
@@ -576,20 +580,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Open Sauce',
     fontWeight: 'bold',
-    color: '#333333',
+    color: colors.textPrimary,
     marginBottom: 5,
     marginTop: 10,
   },
   requestQuery: {
     fontSize: 14,
     fontFamily: 'Open Sauce',
-    color: '#666666',
+    color: colors.textSecondary,
     lineHeight: 20,
   },
   aiResponse: {
     fontSize: 14,
     fontFamily: 'Open Sauce',
-    color: '#0863a7',
+    color: colors.primary,
     lineHeight: 20,
   },
   symptomsContainer: {
@@ -599,7 +603,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Open Sauce',
     fontWeight: '600',
-    color: '#333333',
+    color: colors.textPrimary,
     marginBottom: 8,
   },
   symptomsList: {
@@ -613,12 +617,12 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: colors.border,
   },
   symptomText: {
     fontSize: 12,
     fontFamily: 'Open Sauce',
-    color: '#0863a7',
+    color: colors.primary,
   },
   requestFooter: {
     borderTopWidth: 1,
@@ -633,12 +637,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#f0f8ff',
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: colors.border,
   },
   viewDetailsText: {
     fontSize: 14,
     fontFamily: 'Open Sauce',
-    color: '#0863a7',
+    color: colors.primary,
     fontWeight: '600',
     marginRight: 5,
   },
@@ -650,7 +654,7 @@ const styles = StyleSheet.create({
   loadingStateText: {
     fontSize: 16,
     fontFamily: 'Open Sauce',
-    color: '#0863a7',
+    color: colors.primary,
   },
   emptyState: {
     alignItems: 'center',
@@ -660,13 +664,13 @@ const styles = StyleSheet.create({
   emptyStateText: {
     fontSize: 16,
     fontFamily: 'Open Sauce',
-    color: '#666666',
+    color: colors.textSecondary,
     textAlign: 'center',
   },
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     marginHorizontal: 20,
     marginTop: 10,
     marginBottom: 5,
@@ -725,7 +729,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 120,
     right: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     borderRadius: 8,
     shadowColor: '#000',
     shadowOffset: {
@@ -750,16 +754,16 @@ const styles = StyleSheet.create({
   sortMenuItemText: {
     fontSize: 14,
     fontFamily: 'Open Sauce',
-    color: '#333333',
+    color: colors.textPrimary,
     fontWeight: '500',
   },
   sortMenuItemTextActive: {
-    color: '#0863a7',
+    color: colors.primary,
     fontWeight: '600',
   },
   sortMenuItemCheck: {
     fontSize: 16,
-    color: '#0863a7',
+    color: colors.primary,
     fontWeight: 'bold',
   },
 });

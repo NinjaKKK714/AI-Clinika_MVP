@@ -18,8 +18,11 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import LocalIcons from '../components/LocalIcons';
 import StorageService from '../services/storageService';
+import { useTheme } from '../themes/useTheme';
 
 export default function AuthScreen({ onAuthSuccess }) {
+  const { colors, isDarkMode } = useTheme();
+  const styles = createStyles(colors);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [fullName, setFullName] = useState('');
   const [gender, setGender] = useState('');
@@ -365,7 +368,7 @@ export default function AuthScreen({ onAuthSuccess }) {
 
   return (
     <KeyboardAvoidingView 
-      style={styles.container} 
+      style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={styles.background}>
@@ -647,13 +650,13 @@ export default function AuthScreen({ onAuthSuccess }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
   },
   background: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
   },
   scrollContent: {
     flexGrow: 1,
@@ -677,14 +680,14 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontFamily: 'Open Sauce',
     fontWeight: 'bold',
-    color: '#0863a7',
+    color: colors.primary,
     marginBottom: 10,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
     fontFamily: 'Open Sauce',
-    color: '#666666',
+    color: colors.textSecondary,
     marginBottom: 40,
     textAlign: 'center',
   },
@@ -698,12 +701,12 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.backgroundSecondary,
     borderRadius: 15,
     paddingHorizontal: 20,
     paddingVertical: 15,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: colors.border,
   },
   inputIcon: {
     marginRight: 15,
@@ -711,13 +714,13 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: '#333333',
+    color: colors.textPrimary,
     marginLeft: 15,
   },
   addressInput: {
     flex: 1,
     fontSize: 16,
-    color: '#333333',
+    color: colors.textPrimary,
     marginLeft: 15,
     textAlignVertical: 'top',
     paddingTop: 10,
@@ -729,7 +732,7 @@ const styles = StyleSheet.create({
   },
   modeSwitchText: {
     fontSize: 14,
-    color: '#0863a7',
+    color: colors.primary,
     textDecorationLine: 'underline',
   },
   policiesContainer: {
@@ -755,11 +758,11 @@ const styles = StyleSheet.create({
   policyText: {
     flex: 1,
     fontSize: 14,
-    color: '#333333',
+    color: colors.textPrimary,
     lineHeight: 20,
   },
   policyLink: {
-    color: '#0863a7',
+    color: colors.primary,
     textDecorationLine: 'underline',
     fontWeight: '600',
   },
@@ -789,7 +792,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Open Sauce',
     fontWeight: '600',
-    color: '#333333',
+    color: colors.textPrimary,
     marginBottom: 10,
   },
   genderContainer: {
@@ -802,8 +805,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 15,
     borderWidth: 2,
-    borderColor: '#e0e0e0',
-    backgroundColor: '#f8f9fa',
+    borderColor: colors.border,
+    backgroundColor: colors.backgroundSecondary,
     alignItems: 'center',
   },
   genderButtonActive: {
@@ -813,7 +816,7 @@ const styles = StyleSheet.create({
   genderButtonText: {
     fontSize: 16,
     fontFamily: 'Open Sauce',
-    color: '#666666',
+    color: colors.textSecondary,
     fontWeight: '500',
   },
   genderButtonTextActive: {
@@ -881,7 +884,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#0863a7',
+    color: colors.primary,
     flex: 1,
   },
   modalCloseButton: {
@@ -893,7 +896,7 @@ const styles = StyleSheet.create({
   },
   modalText: {
     fontSize: 14,
-    color: '#333333',
+    color: colors.textPrimary,
     lineHeight: 22,
   },
   modalButton: {

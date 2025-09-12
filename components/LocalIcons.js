@@ -111,6 +111,11 @@ export const LocalIcons = {
     <Ionicons name="moon-outline" size={size} color={color} />
   ),
 
+  // Солнце
+  sun: ({ size = 24, color = '#000000' }) => (
+    <Ionicons name="sunny-outline" size={size} color={color} />
+  ),
+
   // Молния
   flash: ({ size = 24, color = '#000000' }) => (
     <Ionicons name="flash-outline" size={size} color={color} />
@@ -346,6 +351,72 @@ export const LocalIcons = {
   // Часы
   clock: ({ size = 24, color = '#000000' }) => (
     <Ionicons name="time-outline" size={size} color={color} />
+  ),
+
+  // Дополнительные иконки для настроек
+  arrowLeft: ({ size = 24, color = '#000000' }) => (
+    <Ionicons name="arrow-back-outline" size={size} color={color} />
+  ),
+
+  bell: ({ size = 24, color = '#000000' }) => (
+    <Ionicons name="notifications-outline" size={size} color={color} />
+  ),
+
+  info: ({ size = 24, color = '#000000' }) => (
+    <Ionicons name="information-circle-outline" size={size} color={color} />
+  ),
+
+  chevronRight: ({ size = 24, color = '#000000' }) => (
+    <Ionicons name="chevron-forward-outline" size={size} color={color} />
+  ),
+
+  // Иконки для расходов
+  wallet: ({ size = 24, color = '#000000' }) => (
+    <Ionicons name="wallet-outline" size={size} color={color} />
+  ),
+
+  money: ({ size = 24, color = '#000000' }) => (
+    <Ionicons name="cash-outline" size={size} color={color} />
+  ),
+
+  creditCard: ({ size = 24, color = '#000000' }) => (
+    <Ionicons name="card-outline" size={size} color={color} />
+  ),
+
+  pills: ({ size = 24, color = '#000000' }) => (
+    <Ionicons name="medical-outline" size={size} color={color} />
+  ),
+
+  flask: ({ size = 24, color = '#000000' }) => (
+    <Ionicons name="flask-outline" size={size} color={color} />
+  ),
+
+  stethoscope: ({ size = 24, color = '#000000' }) => (
+    <Ionicons name="medical-outline" size={size} color={color} />
+  ),
+
+  syringe: ({ size = 24, color = '#000000' }) => (
+    <Ionicons name="medical-outline" size={size} color={color} />
+  ),
+
+  userMd: ({ size = 24, color = '#000000' }) => (
+    <Ionicons name="person-outline" size={size} color={color} />
+  ),
+
+  hospital: ({ size = 24, color = '#000000' }) => (
+    <Ionicons name="business-outline" size={size} color={color} />
+  ),
+
+  ellipsisH: ({ size = 24, color = '#000000' }) => (
+    <Ionicons name="ellipsis-horizontal-outline" size={size} color={color} />
+  ),
+
+  list: ({ size = 24, color = '#000000' }) => (
+    <Ionicons name="list-outline" size={size} color={color} />
+  ),
+
+  times: ({ size = 24, color = '#000000' }) => (
+    <Ionicons name="close-outline" size={size} color={color} />
   ),
 };
 

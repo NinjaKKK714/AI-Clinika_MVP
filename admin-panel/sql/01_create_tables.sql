@@ -163,3 +163,6 @@ CREATE TRIGGER update_requests_updated_at BEFORE UPDATE ON requests
 
 CREATE TRIGGER update_analyses_updated_at BEFORE UPDATE ON analyses
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+
+

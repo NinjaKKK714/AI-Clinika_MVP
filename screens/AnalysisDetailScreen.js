@@ -14,10 +14,13 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import LocalIcons from '../components/LocalIcons';
+import { useTheme } from '../themes/useTheme';
 
 const { width, height } = Dimensions.get('window');
 
 export default function AnalysisDetailScreen({ route, navigation, onBack }) {
+  const { colors, isDarkMode } = useTheme();
+  const styles = createStyles(colors);
   const { analysis } = route.params;
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -219,10 +222,10 @@ export default function AnalysisDetailScreen({ route, navigation, onBack }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.backgroundSecondary,
   },
   content: {
     flex: 1,
@@ -259,7 +262,7 @@ const styles = StyleSheet.create({
   },
   mainInfo: {
     padding: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
@@ -274,7 +277,7 @@ const styles = StyleSheet.create({
   dateTimeText: {
     fontSize: 16,
     fontFamily: 'Open Sauce',
-    color: '#333333',
+    color: colors.textPrimary,
     marginLeft: 8,
     fontWeight: '600',
   },
@@ -294,7 +297,7 @@ const styles = StyleSheet.create({
   },
   section: {
     padding: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
     marginTop: 10,
   },
   sectionHeader: {
@@ -314,7 +317,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: 'Open Sauce',
     fontWeight: 'bold',
-    color: '#333333',
+    color: colors.textPrimary,
   },
   sectionContent: {
     paddingLeft: 52,
@@ -322,10 +325,10 @@ const styles = StyleSheet.create({
   pdfPreview: {
     alignItems: 'center',
     padding: 30,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.backgroundSecondary,
     borderRadius: 15,
     borderWidth: 2,
-    borderColor: '#e0e0e0',
+    borderColor: colors.border,
     borderStyle: 'dashed',
   },
   pdfIconContainer: {
@@ -339,7 +342,7 @@ const styles = StyleSheet.create({
   imagePreview: {
     borderRadius: 15,
     overflow: 'hidden',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.backgroundSecondary,
   },
   previewImage: {
     width: '100%',
@@ -353,20 +356,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Open Sauce',
     fontWeight: 'bold',
-    color: '#333333',
+    color: colors.textPrimary,
     marginBottom: 5,
     textAlign: 'center',
   },
   fileType: {
     fontSize: 14,
     fontFamily: 'Open Sauce',
-    color: '#666666',
+    color: colors.textSecondary,
     textAlign: 'center',
   },
   commentText: {
     fontSize: 16,
     fontFamily: 'Open Sauce',
-    color: '#333333',
+    color: colors.textPrimary,
     lineHeight: 24,
   },
   actionButton: {
