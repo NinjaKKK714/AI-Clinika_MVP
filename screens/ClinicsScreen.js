@@ -806,7 +806,7 @@ export default function ClinicsScreen({ navigation, onBack }) {
             </TouchableOpacity>
             
             <TouchableOpacity 
-              style={[styles.tabButton, styles.tabButtonWide, activeTab === 'specialists' && styles.tabButtonActive]}
+              style={[styles.tabButton, styles.tabButtonExtraWide, activeTab === 'specialists' && styles.tabButtonActive]}
               onPress={() => setActiveTab('specialists')}
             >
               <Text style={[styles.tabButtonText, activeTab === 'specialists' && styles.tabButtonTextActive]}>
@@ -819,7 +819,7 @@ export default function ClinicsScreen({ navigation, onBack }) {
               onPress={() => setActiveTab('checkup')}
             >
               <Text style={[styles.tabButtonText, activeTab === 'checkup' && styles.tabButtonTextActive]}>
-                Чек-ап
+                Чекап
               </Text>
             </TouchableOpacity>
           </View>
@@ -900,7 +900,7 @@ export default function ClinicsScreen({ navigation, onBack }) {
               filteredCheckups.map(renderCheckupCard)
             ) : (
               <View style={styles.emptyState}>
-                <Text style={styles.emptyStateText}>Чек-апы не найдены</Text>
+                <Text style={styles.emptyStateText}>Чекапы не найдены</Text>
               </View>
             )
           )}
@@ -969,6 +969,9 @@ const createStyles = (colors) => StyleSheet.create({
   },
   tabButtonWide: {
     flex: 1.7,
+  },
+  tabButtonExtraWide: {
+    flex: 2.2,
   },
   headerButtons: {
     flexDirection: 'row',
