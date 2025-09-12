@@ -1163,4 +1163,15 @@ const createStyles = (colors) => StyleSheet.create({
     fontFamily: 'Open Sauce',
     color: colors.textSecondary,
   },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    fontFamily: 'Open Sauce',
+    color: colors.textSecondary,
+    textAlign: 'center',
+  },
 });
