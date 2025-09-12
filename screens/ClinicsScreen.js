@@ -672,17 +672,17 @@ export default function ClinicsScreen({ navigation, onBack }) {
       </View>
 
       <View style={styles.clinicInfo}>
-        <Text style={styles.clinicName}>{specialist.name}</Text>
-        <Text style={styles.clinicServices}>{specialist.specialization} • {specialist.experience}</Text>
+        <Text style={styles.specialistName}>{specialist.name}</Text>
+        <Text style={styles.specialistServices}>{specialist.specialization} • {specialist.experience}</Text>
         
         <View style={styles.locationContainer}>
           {LocalIcons.location({ size: 16, color: "#0863a7" })}
-          <Text style={styles.locationText}>{specialist.location}</Text>
+          <Text style={styles.specialistLocationText}>{specialist.location}</Text>
         </View>
         
         <View style={styles.distanceContainer}>
           {LocalIcons.time({ size: 16, color: "#0863a7" })}
-          <Text style={styles.distanceText}>{specialist.distance}</Text>
+          <Text style={styles.specialistDistanceText}>{specialist.distance}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -1173,5 +1173,34 @@ const createStyles = (colors) => StyleSheet.create({
     fontFamily: 'Open Sauce',
     color: colors.textSecondary,
     textAlign: 'center',
+  },
+  // Стили для специалистов с более светлыми цветами
+  specialistName: {
+    fontSize: 18,
+    fontFamily: 'Open Sauce',
+    fontWeight: 'bold',
+    color: colors.textSecondary,
+    marginBottom: 5,
+  },
+  specialistServices: {
+    fontSize: 14,
+    fontFamily: 'Open Sauce',
+    color: colors.textSecondary,
+    marginBottom: 10,
+    opacity: 0.8,
+  },
+  specialistLocationText: {
+    fontSize: 14,
+    fontFamily: 'Open Sauce',
+    color: colors.textSecondary,
+    marginLeft: 8,
+    opacity: 0.8,
+  },
+  specialistDistanceText: {
+    fontSize: 14,
+    fontFamily: 'Open Sauce',
+    color: colors.textSecondary,
+    marginLeft: 8,
+    opacity: 0.8,
   },
 });
