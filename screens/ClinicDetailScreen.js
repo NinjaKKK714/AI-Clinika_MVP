@@ -14,9 +14,8 @@ import {
   Platform
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import MapView, { Marker } from 'react-native-maps';
-import { useTheme } from '../themes/useTheme';
 import LocalIcons from '../components/LocalIcons';
+import { useTheme } from '../themes/useTheme';
 
 const { width, height } = Dimensions.get('window');
 
@@ -28,6 +27,9 @@ export default function ClinicDetailScreen({ route, navigation, onBack }) {
   const clinic = route?.params?.clinic || null;
   const [isFavorite, setIsFavorite] = useState(false);
   
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
+
   // Проверяем, что данные клиники доступны
   if (!clinic) {
     console.error('Clinic data not available in ClinicDetailScreen');
@@ -35,97 +37,178 @@ export default function ClinicDetailScreen({ route, navigation, onBack }) {
       <View style={styles.container}>
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>Данные клиники не найдены</Text>
+          <TouchableOpacity 
+            style={styles.backButton}
+            onPress={() => {
+              if (navigation && navigation.goBack) {
+                navigation.goBack();
+              } else if (onBack) {
+                onBack();
+              }
+            }}
+          >
+            <Text style={styles.backButtonText}>Назад</Text>
+          </TouchableOpacity>
         </View>
       </View>
     );
   }
-  
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(50)).current;
 
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 1000,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    try {
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } catch (error) {
+      console.error('Animation error:', error);
+    }
   }, []);
 
   // Обработка системной кнопки "Назад"
   useEffect(() => {
     const backAction = () => {
-      // Возвращаемся на экран клиник
-      onBack();
-      return true; // Предотвращаем стандартное поведение
+      try {
+        if (onBack && typeof onBack === 'function') {
+          onBack();
+        } else if (navigation && navigation.goBack) {
+          navigation.goBack();
+        }
+        return true;
+      } catch (error) {
+        console.error('Back action error:', error);
+        return false;
+      }
     };
 
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    let backHandler = null;
+    try {
+      backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    } catch (error) {
+      console.error('BackHandler error:', error);
+    }
 
-    return () => backHandler.remove();
-  }, [onBack]);
+    return () => {
+      try {
+        if (backHandler) {
+          backHandler.remove();
+        }
+      } catch (error) {
+        console.error('BackHandler cleanup error:', error);
+      }
+    };
+  }, [onBack, navigation]);
 
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
   };
 
   const handleCall = () => {
-    Linking.openURL(`tel:${clinic.phone}`);
+    try {
+      if (clinic && clinic.phone) {
+        Linking.openURL(`tel:${clinic.phone}`);
+      } else {
+        Alert.alert('Ошибка', 'Номер телефона не указан');
+      }
+    } catch (error) {
+      console.error('Call error:', error);
+      Alert.alert('Ошибка', 'Не удалось совершить звонок');
+    }
   };
 
   const handleBookAppointment = () => {
-    Alert.alert(
-      'Запись на прием',
-      `Вы хотите записаться в клинику "${clinic.name}"?`,
-      [
-        {
-          text: 'Отмена',
-          style: 'cancel',
-        },
-        {
-          text: 'Записаться',
-          onPress: () => {
-            Alert.alert(
-              'Успешно!',
-              'Ваша заявка на запись принята. Мы свяжемся с вами в ближайшее время.',
-              [{ text: 'OK' }]
-            );
+    try {
+      if (!clinic || !clinic.name) {
+        Alert.alert('Ошибка', 'Данные клиники недоступны');
+        return;
+      }
+      
+      Alert.alert(
+        'Запись на прием',
+        `Вы хотите записаться в клинику "${clinic.name}"?`,
+        [
+          {
+            text: 'Отмена',
+            style: 'cancel',
           },
-        },
-      ]
-    );
+          {
+            text: 'Записаться',
+            onPress: () => {
+              Alert.alert(
+                'Успешно!',
+                'Ваша заявка на запись принята. Мы свяжемся с вами в ближайшее время.',
+                [{ text: 'OK' }]
+              );
+            },
+          },
+        ]
+      );
+    } catch (error) {
+      console.error('Booking error:', error);
+      Alert.alert('Ошибка', 'Не удалось создать заявку на запись');
+    }
   };
 
-  const renderInfoItem = (icon, title, value, onPress = null) => (
-    <TouchableOpacity 
-      style={styles.infoItem} 
-      onPress={onPress}
-      disabled={!onPress}
-    >
-      <View style={styles.infoIcon}>
-        <LinearGradient colors={['#0863a7', '#074393']} style={styles.iconGradient}>
-          {LocalIcons[icon]({ size: 20, color: "#ffffff" })}
-        </LinearGradient>
-      </View>
-      <View style={styles.infoContent}>
-        <Text style={styles.infoTitle}>{title}</Text>
-        <Text style={styles.infoValue}>{value}</Text>
-      </View>
-      {onPress && (
-        <TouchableOpacity style={styles.actionButton}>
-          {LocalIcons.call({ size: 20, color: "#0863a7" })}
-        </TouchableOpacity>
-      )}
-    </TouchableOpacity>
-  );
+  const handleDirections = () => {
+    try {
+      if (clinic.coordinates && clinic.coordinates.latitude && clinic.coordinates.longitude) {
+        const url = `https://www.google.com/maps/dir/?api=1&destination=${clinic.coordinates.latitude},${clinic.coordinates.longitude}`;
+        Linking.openURL(url);
+      } else if (clinic.location) {
+        const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(clinic.location)}`;
+        Linking.openURL(url);
+      } else {
+        Alert.alert('Ошибка', 'Адрес не указан');
+      }
+    } catch (error) {
+      console.error('Maps error:', error);
+      Alert.alert('Ошибка', 'Не удалось открыть карты');
+    }
+  };
 
-return (
+  const renderInfoItem = (icon, title, value, onPress = null) => {
+    try {
+      return (
+        <TouchableOpacity 
+          style={styles.infoItem} 
+          onPress={onPress}
+          disabled={!onPress}
+        >
+          <View style={styles.infoIcon}>
+            <LinearGradient colors={['#0863a7', '#074393']} style={styles.iconGradient}>
+              {LocalIcons[icon] ? LocalIcons[icon]({ size: 20, color: "#ffffff" }) : null}
+            </LinearGradient>
+          </View>
+          <View style={styles.infoContent}>
+            <Text style={styles.infoTitle}>{title || ''}</Text>
+            <Text style={styles.infoValue}>{value || ''}</Text>
+          </View>
+          {onPress && (
+            <View style={styles.actionButton}>
+              {LocalIcons.arrowRight ? LocalIcons.arrowRight({ size: 20, color: "#0863a7" }) : null}
+            </View>
+          )}
+        </TouchableOpacity>
+      );
+    } catch (error) {
+      console.error('renderInfoItem error:', error);
+      return (
+        <View style={styles.infoItem}>
+          <Text style={styles.infoTitle}>{title || 'Ошибка отображения'}</Text>
+        </View>
+      );
+    }
+  };
+
+  return (
     <View style={styles.container}>
       <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
         {/* Заголовок */}
@@ -133,9 +216,19 @@ return (
           <View style={styles.headerContent}>
             <TouchableOpacity 
               style={styles.backButton}
-              onPress={() => navigation.goBack()}
+              onPress={() => {
+                try {
+                  if (navigation && navigation.goBack) {
+                    navigation.goBack();
+                  } else if (onBack) {
+                    onBack();
+                  }
+                } catch (error) {
+                  console.error('Navigation error:', error);
+                }
+              }}
             >
-              {LocalIcons.arrow({ size: 24, color: "#ffffff" })}
+              {LocalIcons.arrowBack ? LocalIcons.arrowBack({ size: 24, color: "#ffffff" }) : null}
             </TouchableOpacity>
             
             <Text style={styles.headerTitle}>Информация о клинике</Text>
@@ -144,10 +237,10 @@ return (
               style={styles.favoriteButton}
               onPress={toggleFavorite}
             >
-              {LocalIcons.heart({ 
+              {LocalIcons.heart ? LocalIcons.heart({ 
                 size: 24, 
                 color: isFavorite ? "#ff4444" : "#ffffff" 
-              })}
+              }) : null}
             </TouchableOpacity>
           </View>
         </LinearGradient>
@@ -159,19 +252,28 @@ return (
         >
           {/* Изображение клиники */}
           <View style={styles.imageContainer}>
-            <Image
-              source={clinic.image}
-              style={styles.clinicImage}
-              resizeMode="cover"
-            />
+            {clinic.image ? (
+              <Image
+                source={clinic.image}
+                style={styles.clinicImage}
+                resizeMode="cover"
+                onError={(error) => {
+                  console.error('Image load error:', error);
+                }}
+              />
+            ) : (
+              <View style={[styles.clinicImage, { backgroundColor: '#f0f0f0', justifyContent: 'center', alignItems: 'center' }]}>
+                <Text style={{ color: '#666', fontSize: 16 }}>Изображение недоступно</Text>
+              </View>
+            )}
             
             {/* Рейтинг */}
             <View style={styles.ratingOverlay}>
               <LinearGradient colors={['#FFD700', '#FFA500']} style={styles.ratingGradient}>
                 <View style={styles.ratingContent}>
-                  {LocalIcons.star({ size: 16, color: "#ffffff" })}
-                  <Text style={styles.ratingText}>{clinic.rating}</Text>
-                  <Text style={styles.reviewsText}>({clinic.reviews})</Text>
+                  {LocalIcons.star ? LocalIcons.star({ size: 16, color: "#ffffff" }) : null}
+                  <Text style={styles.ratingText}>{clinic.rating || 'N/A'}</Text>
+                  <Text style={styles.reviewsText}>({clinic.reviews || 0})</Text>
                 </View>
               </LinearGradient>
             </View>
@@ -179,113 +281,40 @@ return (
 
           {/* Основная информация */}
           <View style={styles.mainInfo}>
-            <Text style={styles.clinicName}>{clinic.name}</Text>
-            <Text style={styles.clinicServices}>{clinic.services}</Text>
-            <Text style={styles.clinicDistance}>{clinic.distance}</Text>
+            <Text style={styles.clinicName}>{clinic.name || 'Название не указано'}</Text>
+            <Text style={styles.clinicServices}>{clinic.services || 'Услуги не указаны'}</Text>
+            <Text style={styles.clinicDistance}>{clinic.distance || 'Расстояние не указано'}</Text>
           </View>
 
           {/* Описание */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>О клинике</Text>
-            <Text style={styles.description}>{clinic.description}</Text>
+            <Text style={styles.description}>{clinic.description || 'Описание не указано'}</Text>
           </View>
 
           {/* Контактная информация */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Контактная информация</Text>
             <View style={styles.infoContainer}>
-              {renderInfoItem('location', 'Адрес', clinic.location)}
-              {renderInfoItem('call', 'Телефон', clinic.phone, handleCall)}
-              {renderInfoItem('time', 'Часы работы', clinic.workingHours)}
+              {renderInfoItem('location', 'Адрес', clinic.location || 'Адрес не указан')}
+              {renderInfoItem('call', 'Телефон', clinic.phone || 'Телефон не указан', clinic.phone ? handleCall : null)}
+              {renderInfoItem('time', 'Часы работы', clinic.workingHours || 'Часы работы не указаны')}
             </View>
           </View>
 
-          {/* Карта */}
+          {/* Кнопка построения маршрута */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Расположение</Text>
-            <View style={styles.mapContainer}>
-              {clinic.coordinates && clinic.coordinates.latitude && clinic.coordinates.longitude ? (
-                <>
-                  {MapView && Marker && Platform.OS !== 'web' ? (
-                    <MapView
-                      style={styles.map}
-                      initialRegion={{
-                        latitude: clinic.coordinates.latitude,
-                        longitude: clinic.coordinates.longitude,
-                        latitudeDelta: 0.01,
-                        longitudeDelta: 0.01,
-                      }}
-                      showsUserLocation={true}
-                      showsMyLocationButton={true}
-                      showsCompass={true}
-                      showsScale={true}
-                      onMapReady={() => {
-                        console.log('Map is ready');
-                      }}
-                      onError={(error) => {
-                        console.error('Map error:', error);
-                      }}
-                      onMapLoaded={() => {
-                        console.log('Map loaded successfully');
-                      }}
-                    >
-                      <Marker
-                        coordinate={{
-                          latitude: clinic.coordinates.latitude,
-                          longitude: clinic.coordinates.longitude,
-                        }}
-                        title={clinic.name}
-                        description={clinic.location}
-                        pinColor="#0863a7"
-                      />
-                    </MapView>
-                  ) : (
-                    <View style={styles.mapPlaceholder}>
-                      <Text style={styles.mapPlaceholderText}>Карта недоступна</Text>
-                      <Text style={styles.mapPlaceholderSubtext}>Нажмите для открытия в браузере</Text>
-                    </View>
-                  )}
-                  
-                  {/* Информация о клинике на карте */}
-                  <View style={styles.mapInfoOverlay}>
-                    <View style={styles.mapInfoContent}>
-                      <Text style={styles.mapInfoTitle}>{clinic.name}</Text>
-                      <Text style={styles.mapInfoAddress}>{clinic.location}</Text>
-                      <TouchableOpacity 
-                        style={styles.mapDirectionsButton}
-                        onPress={() => {
-                          const url = `https://www.google.com/maps/dir/?api=1&destination=${clinic.coordinates.latitude},${clinic.coordinates.longitude}`;
-                          Linking.openURL(url);
-                        }}
-                      >
-                        <LinearGradient colors={['#0863a7', '#074393']} style={styles.mapDirectionsGradient}>
-                          <Text style={styles.mapDirectionsText}>Построить маршрут</Text>
-                        </LinearGradient>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                </>
-              ) : (
-                <View style={styles.mapPlaceholder}>
-                  <View style={styles.mapContent}>
-                    {LocalIcons.location({ size: 48, color: "#0863a7" })}
-                    <Text style={styles.mapText}>Карта недоступна</Text>
-                    <Text style={styles.mapSubtext}>Координаты не указаны</Text>
-                    <TouchableOpacity 
-                      style={styles.mapDirectionsButton}
-                      onPress={() => {
-                        const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(clinic.location)}`;
-                        Linking.openURL(url);
-                      }}
-                    >
-                      <LinearGradient colors={['#0863a7', '#074393']} style={styles.mapDirectionsGradient}>
-                        <Text style={styles.mapDirectionsText}>Открыть в Google Maps</Text>
-                      </LinearGradient>
-                    </TouchableOpacity>
-                  </View>
+            <TouchableOpacity 
+              style={styles.directionsButton}
+              onPress={handleDirections}
+            >
+              <LinearGradient colors={['#22ae2c', '#5cc72f']} style={styles.directionsGradient}>
+                <View style={styles.directionsContent}>
+                  {LocalIcons.location ? LocalIcons.location({ size: 20, color: "#ffffff" }) : null}
+                  <Text style={styles.directionsText}>Построить маршрут</Text>
                 </View>
-              )}
-            </View>
+              </LinearGradient>
+            </TouchableOpacity>
           </View>
 
           {/* Кнопка записи */}
@@ -294,7 +323,7 @@ return (
               style={styles.bookingButton}
               onPress={handleBookAppointment}
             >
-              <LinearGradient colors={['#22ae2c', '#5cc72f']} style={styles.bookingGradient}>
+              <LinearGradient colors={['#0863a7', '#074393']} style={styles.bookingGradient}>
                 <Text style={styles.bookingButtonText}>Записаться на прием</Text>
               </LinearGradient>
             </TouchableOpacity>
@@ -341,7 +370,7 @@ const createStyles = (colors) => StyleSheet.create({
     flex: 1,
   },
   scrollContentContainer: {
-    paddingBottom: 120, // Отступ для нижней панели навигации
+    paddingBottom: 120,
   },
   imageContainer: {
     position: 'relative',
@@ -460,115 +489,33 @@ const createStyles = (colors) => StyleSheet.create({
   actionButton: {
     padding: 5,
   },
-  mapContainer: {
+  directionsButton: {
     borderRadius: 15,
     overflow: 'hidden',
-    position: 'relative',
-  },
-  map: {
-    height: 250,
-    width: '100%',
-  },
-  mapPlaceholder: {
-    height: 250,
-    width: '100%',
-    backgroundColor: '#f0f0f0',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 15,
-  },
-  mapPlaceholderText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.textSecondary,
-    marginBottom: 5,
-  },
-  mapPlaceholderSubtext: {
-    fontSize: 14,
-    color: '#999999',
-  },
-  mapInfoOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderTopLeftRadius: 15,
-    borderTopRightRadius: 15,
-    padding: 15,
-    shadowColor: '#000',
+    shadowColor: '#013e61',
     shadowOffset: {
       width: 0,
-      height: -2,
+      height: 4,
     },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 8,
   },
-  mapInfoContent: {
-    alignItems: 'center',
-  },
-  mapInfoTitle: {
-    fontSize: 16,
-    fontFamily: 'Open Sauce',
-    fontWeight: '700',
-    color: colors.textPrimary,
-    marginBottom: 5,
-    textAlign: 'center',
-  },
-  mapInfoAddress: {
-    fontSize: 14,
-    fontFamily: 'Open Sauce',
-    color: colors.textSecondary,
-    marginBottom: 15,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  mapDirectionsButton: {
-    borderRadius: 20,
-    overflow: 'hidden',
-    shadowColor: '#0863a7',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  mapDirectionsGradient: {
-    paddingVertical: 10,
+  directionsGradient: {
+    paddingVertical: 15,
     paddingHorizontal: 20,
     alignItems: 'center',
   },
-  mapDirectionsText: {
-    fontSize: 14,
-    fontFamily: 'Open Sauce',
-    fontWeight: '600',
-    color: '#ffffff',
-  },
-  mapPlaceholder: {
-    height: 250,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.backgroundSecondary,
-    borderRadius: 15,
-  },
-  mapContent: {
+  directionsContent: {
+    flexDirection: 'row',
     alignItems: 'center',
   },
-  mapText: {
-    fontSize: 18,
+  directionsText: {
+    fontSize: 16,
     fontFamily: 'Open Sauce',
     fontWeight: 'bold',
-    color: colors.textPrimary,
-    marginTop: 10,
-  },
-  mapSubtext: {
-    fontSize: 14,
-    fontFamily: 'Open Sauce',
-    color: colors.textSecondary,
-    marginTop: 5,
+    color: '#ffffff',
+    marginLeft: 8,
   },
   bookingSection: {
     padding: 20,
@@ -610,8 +557,12 @@ const createStyles = (colors) => StyleSheet.create({
     fontFamily: 'Open Sauce',
     color: colors.textPrimary,
     textAlign: 'center',
+    marginBottom: 20,
+  },
+  backButtonText: {
+    fontSize: 16,
+    fontFamily: 'Open Sauce',
+    color: colors.primary,
+    fontWeight: '600',
   },
 });
-
-
-

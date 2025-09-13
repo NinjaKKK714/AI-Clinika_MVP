@@ -40,7 +40,7 @@ export default function SettingsScreen({ onBack }) {
                 }
               </View>
               <View style={styles.settingText}>
-                <Text style={styles.settingTitle}>Темная тема</Text>
+                <Text style={styles.settingTitle}>Темный фон</Text>
                 <Text style={styles.settingDescription}>
                   {isDarkMode ? 'Включена' : 'Выключена'}
                 </Text>

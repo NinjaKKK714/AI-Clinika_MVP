@@ -2,7 +2,7 @@
   "expo": {
     "name": "AI-Clinika",
     "slug": "ai-clinika",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./Logo_New.jpg",
     "userInterfaceStyle": "light",
@@ -26,7 +26,7 @@
     },
     "android": {
       "package": "com.aiclinika.app",
-      "versionCode": 1,
+      "versionCode": 2,
       "icon": "./Logo_New.jpg",
       "permissions": [
         "CAMERA",
@@ -44,7 +44,9 @@
       "manifest": {
         "application": {
           "android:appComponentFactory": "androidx.core.app.CoreComponentFactory",
-          "tools:replace": "android:appComponentFactory"
+          "tools:replace": "android:appComponentFactory",
+          "android:allowBackup": "false",
+          "android:dataExtractionRules": "@xml/data_extraction_rules"
         }
       }
     },
@@ -86,9 +88,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "5aee8bb1-6b7b-4908-ad91-13fe792f0d65"
+        "projectId": "de543590-e56c-40ab-9421-c03ea713f1fb"
       }
     },
-    "owner": "ninjasniper"
+    "owner": "vovanstrr"
   }
 }

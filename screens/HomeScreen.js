@@ -356,7 +356,7 @@ export default function HomeScreen({ onLogout }) {
             window.currentRecording = null;
             
             // Отправляем на распознавание
-            setSpeechRecognitionText('OpenAI Whisper обрабатывает...');
+            setSpeechRecognitionText('Голос обрабатывается...');
             const transcribedText = await transcribeAudio(audioUri);
             
             // Очищаем аудио файл после использования
@@ -393,7 +393,7 @@ export default function HomeScreen({ onLogout }) {
           if (error.message.includes('Invalid file format')) {
             errorMessage = 'Неподдерживаемый формат аудио. Попробуйте еще раз.';
           } else if (error.message.includes('OpenAI Whisper error')) {
-            errorMessage = 'Ошибка OpenAI Whisper. Проверьте подключение к интернету.';
+            errorMessage = 'Ошибка обработки голоса. Проверьте подключение к интернету.';
           } else if (error.message.includes('permission')) {
             errorMessage = 'Нет доступа к микрофону. Разрешите доступ в настройках.';
           } else if (error.message.includes('No speech detected')) {
@@ -823,7 +823,7 @@ export default function HomeScreen({ onLogout }) {
       case 'clinics':
         return <ClinicsScreen 
           navigation={{ navigate: (screen, params) => {
-            if (screen === 'ClinicDetail') {
+            if (screen === 'ClinicDetailScreen') {
               setActiveTab('clinicDetail');
               setClinicDetail(params.clinic);
             } else if (screen === 'SpecialistDetail') {

@@ -556,8 +556,8 @@ export default function ClinicsScreen({ navigation, onBack }) {
           try {
             console.log('Clinic card pressed:', clinic);
             if (navigation && navigation.navigate && clinic) {
-              console.log('Navigating to ClinicDetail with clinic:', clinic);
-              navigation.navigate('ClinicDetail', { clinic });
+              console.log('Navigating to ClinicDetailScreen with clinic:', clinic);
+              navigation.navigate('ClinicDetailScreen', { clinic });
             } else {
               console.error('Navigation or clinic data not available:', {
                 navigation: !!navigation,

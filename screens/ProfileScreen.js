@@ -716,7 +716,7 @@ return (
                     LocalIcons.sun({ size: 20, color: "#ffffff" }) : 
                     LocalIcons.moon({ size: 20, color: "#ffffff" })
                   }
-                  <Text style={styles.actionText}>{isDarkMode ? 'Светлая тема' : 'Темная тема'}</Text>
+                  <Text style={styles.actionText}>{isDarkMode ? 'Светлый фон' : 'Темный фон'}</Text>
                 </LinearGradient>
               </TouchableOpacity>
               
